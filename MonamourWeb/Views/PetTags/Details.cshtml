@@ -87,9 +87,9 @@
                         <a asp-controller="Pets" asp-action="Details" asp-route-Id="@item.Id">@item.Name</a><br />
                     </td>
                     <td width="20%">
-                        @foreach (var pet in item.Clients)
+                        @foreach (var client in item.Clients)
                         {
-                            <a asp-controller="Pets" asp-action="Details" asp-route-Id="@pet.Id">@pet.Name</a><br />
+                            <a asp-controller="Clients" asp-action="Details" asp-route-Id="@client.Id">@client.Name</a><br />
                         }
                     </td>
                     <td width="10%">@item.Breed.Title</td>

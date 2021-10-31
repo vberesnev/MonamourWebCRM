@@ -1,8 +1,9 @@
 ﻿@model MonamourWeb.ViewModels.PetViewModel
 @{
-    ViewData["Title"] = "Добавить питомца";
+    ViewData["Title"] = "Обновить питомца";
 }
-<form method="post" asp-controller="Pets" asp-action="Create">
+<form method="post" asp-controller="Pets" asp-action="UpdatePost">
+    <input asp-for="@Model.Pet.Id" hidden />
     <div class="border p-3">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="form-group row">
@@ -24,9 +25,9 @@
                     <label asp-for="@Model.Pet.Breed"></label>
                 </td>
                 <td colspan="2">
-                    <input class="form-control mb-1" id="breedFilter" placeholder="Введите название породы . . ."/>
+                    <input class="form-control mb-1" id="breedFilter" placeholder="Введите название породы . . ." />
                     <select asp-for="@Model.Pet.BreedId" class="form-control mt-1" id="breedSelector">
-                        <option value="" disabled selected>Выберите породу</option>
+                        <option value="@Model.Pet.BreedId" selected>@Model.Pet.Breed.Title</option>
                     </select>
 
                 </td>
@@ -79,9 +80,9 @@
                     </div>
                 </td>
             </tr>
-            
+
             @*TAGS*@
-            
+
             <tr>
                 <td width="20%">
                     <label asp-for="@Model.Pet.Tags"></label>
@@ -106,9 +107,17 @@
                     <div id="divTagIdList">
                         @foreach (var tag in Model.Pet.Tags)
                         {
-                            <input type="hidden"  class="tagsHidden" name="tagsOfPet" value="@tag.Id" />
+                            <input type="hidden" class="tagsHidden" name="tagsOfPet" value="@tag.Id" />
                         }
                     </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label asp-for="@Model.Pet.Alive"></label>
+                </td>
+                <td colspan="1">
+                    <checkbox asp-for="@Model.Pet.Alive" class="form-control"></checkbox>
                 </td>
             </tr>
         </table>
@@ -116,7 +125,7 @@
         <div class="form-group row">
             <div class="col-8 offset-2 row">
                 <div class="col">
-                    <input type="submit" class="btn btn-info w-75" value="Добавить" />
+                    <input type="submit" class="btn btn-info w-75" value="Обнвоить" />
                 </div>
                 <div class="col">
                     <a class="btn btn-danger w-75" asp-controller="Pets" asp-action="All">Назад</a>
@@ -246,7 +255,4 @@
             }
         }
     }
-
-    
-
 </script>

@@ -1,0 +1,84 @@
+﻿@model MonamourWeb.Models.Pet
+@{
+    ViewData["Title"] = "Удалить питомца";
+}
+<form method="post" asp-controller="Pets" asp-action="DeletePost">
+    <input asp-for="Id" hidden />
+    <div class="border p-3">
+        <div class="form-group row">
+            <h4 class="text-black-50 pl-3">Удалить питомца</h4>
+        </div>
+
+        <table class="table table-borderless text-center" style="width: 100%">
+            <tr>
+                <td width="20%">
+                    <label asp-for="@Model.Name"></label>
+                </td>
+                <td colspan="2">
+                    <text class="form-control">@Model.Name</text>
+                </td>
+            </tr>
+            <tr>
+                <td width="20%">
+                    <label asp-for="@Model.Breed"></label>
+                </td>
+                <td colspan="2">
+                    <text class="form-control">@Model.Breed.Title</text>
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="@Model.Clients"></label>
+                </td>
+                <td>
+                    <select multiple id="clientsOfPets" class="form-control">
+                        @foreach (var item in Model.Clients)
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label asp-for="@Model.Bday"></label>
+                </td>
+                <td colspan="2">
+                    <text class="form-control">@Model.Bday</text>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label asp-for="@Model.Info"></label>
+                </td>
+                <td colspan="2">
+                    <textarea style="height: 50px" asp-for="@Model.Info" class="form-control"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="@Model.Tags"></label>
+                </td>
+                <td>
+                    <select multiple id="clientsTags" class="form-control">
+                        @foreach (var item in Model.Tags)
+                        {
+                            <option value="@item.Id">@item.Title</option>
+                        }
+                    </select>
+                </td>
+            </tr>
+        </table>
+
+        <div class="form-group row">
+            <div class="col-8 offset-2 row">
+                <div class="col">
+                    <input type="submit" class="btn btn-danger w-75" value="Удалить" />
+                </div>
+                <div class="col">
+                    <a class="btn btn-info w-75" asp-controller="Pets" asp-action="All">Назад</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

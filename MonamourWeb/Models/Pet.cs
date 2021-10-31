@@ -53,5 +53,17 @@ namespace MonamourWeb.Models
             Clients = new List<Client>();
             Tags = new List<PetTag>();
         }
+
+        public void Update(Pet pet)
+        {
+            Name = pet.Name;
+            Bday = pet.Bday;
+            BreedId = pet.BreedId;
+            Info = pet.Info;
+            Alive = pet.Alive;
+
+            Clients = pet.Clients;
+            Tags = pet.Tags;
+        }
     }
 }

@@ -1,18 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MonamourWeb.Models;
 using MonamourWeb.Services.Filters;
 using MonamourWeb.Services.Pagination;
 using MonamourWeb.ViewModels;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Microsoft.EntityFrameworkCore.Internal;
 
 namespace MonamourWeb.Controllers
 {

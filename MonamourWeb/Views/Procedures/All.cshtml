@@ -18,7 +18,7 @@
         <div class="form-group row pt-4">
             <div class="col-2 d-flex">
                 <span class="fa fa-binoculars fa-lg mt-auto mb-auto mr-1"></span>
-                <select asp-for="@Model.PageSettings.PageSize" name="pageSize" class="form-control mr-3">
+                <select asp-for="@Model.PageSettings.PageSize" name="pageSize" class="form-control ml-1">
                     @foreach (var item in Model.PageSettings.PageSizes)
                     {
                         @if (item.Value == @Model.PageSettings.PageSize.ToString())
@@ -34,7 +34,7 @@
             </div>
             <div class="col-5 d-flex">
                 <span class="fa fa-filter fa-lg mt-auto mb-auto mr-1"></span>
-                <input type="text" name="search" class="form-control" value="@Model.PageSettings.Search" />
+                <input type="text" name="search" class="form-control ml-1" value="@Model.PageSettings.Search" />
             </div>
             <div class="col-3">
                 <select name="animalId" class="form-control">

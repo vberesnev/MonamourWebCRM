@@ -66,25 +66,156 @@ namespace MonamourWeb.Controllers
             return View(viewModel);
         }
 
-        public IActionResult Details()
-        {
-            throw new NotImplementedException();
-        }
-
+        [HttpGet]
         public IActionResult Create()
         {
-            throw new NotImplementedException();
+            var viewModel = new PetViewModel();
+            viewModel.AllTags = _context.PetTags.ToList();
+            return View(viewModel);
         }
 
-        public IActionResult Update()
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(PetViewModel petViewModel, List<int> clientsOfPet, List<int> tagsOfPet)
         {
-            throw new NotImplementedException();
+            if (ModelState.IsValid)
+            {
+                var clients = _context.Clients.Where(x => clientsOfPet.Contains(x.Id));
+                foreach (var client in clients)
+                    petViewModel.Pet.Clients.Add(client); 
+
+                var tags = _context.PetTags.Where(x => tagsOfPet.Contains(x.Id));
+                foreach (var tag in tags)
+                    petViewModel.Pet.Tags.Add(tag);
+
+                petViewModel.Pet.Alive = true;
+                
+                _context.Pets.Add(petViewModel.Pet);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("All");
+            }
+            return View(petViewModel);
+        }
+
+        [HttpPost]
+        public JsonResult SearchBreed([FromBody] string search)
+        {
+            IQueryable<Breed> breeds;
+            if (string.IsNullOrEmpty(search))
+            {
+                breeds = _context.Breeds.Take(10);
+            }
+            else
+            {
+                search = search.ToLower(); 
+                breeds = _context.Breeds
+                    .Where(x => x.Title.ToLower().Contains(search))
+                    .Take(10); 
+            }
+            return Json(breeds); 
+        }
+
+        [HttpPost]
+        public JsonResult SearchClient([FromBody] string search)
+        {
+            if (string.IsNullOrEmpty(search))
+                return Json(null);
+
+            search = search.ToLower();
+            var clients = _context.Clients
+                .Where(x => x.Name.ToLower().Contains(search) || x.Phone.Contains(search));
+            
+            return Json(clients); 
+        }
+
+        public IActionResult Details(int? id)
+        {
+            if (id == null || id == 0)
+                return NotFound();
+
+            var pet = _context.Pets
+                .Include(x => x.Breed)
+                .Include(x => x.Clients)
+                .Include(x => x.Tags)
+                .FirstOrDefault(x => x.Id == id);
+
+            if (pet == null)
+                return NotFound();
+
+            return View(pet);
         }
 
         [UserRoleFilter]
-        public IActionResult Delete()
+        [HttpGet]
+        public IActionResult Delete(int? id)
         {
-            throw new NotImplementedException();
+            if (id == null || id == 0)
+                return NotFound();
+
+            var pet = _context.Pets
+                .Include(x => x.Breed)
+                .Include(x => x.Clients)
+                .Include(x => x.Tags)
+                .FirstOrDefault(x => x.Id == id);
+
+            if (pet == null)
+                return NotFound();
+
+            return View(pet);
+        }
+
+        [UserRoleFilter]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeletePost(int? id)
+        {
+            var pet = _context.Pets.Find(id);
+            if (pet == null)
+                return NotFound();
+            _context.Pets.Remove(pet);
+            _context.SaveChanges();
+            return RedirectToAction("All");
+        }
+
+        [HttpGet]
+        public IActionResult Update(int? id)
+        {
+            var viewModel = new PetViewModel();
+            viewModel.Pet = _context.Pets.Where(x => x.Id == id)
+                .Include(x => x.Breed)
+                .Include(x => x.Tags)
+                .Include(x => x.Clients)
+                .SingleOrDefault();
+            viewModel.AllTags = _context.PetTags.ToList();
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdatePost(PetViewModel petViewModel, List<int> clientsOfPet, List<int> tagsOfPet)
+        {
+            if (ModelState.IsValid)
+            {
+                var pet = _context.Pets.Where(x => x.Id == petViewModel.Pet.Id)
+                    .Include(x => x.Breed)
+                    .Include(x => x.Tags)
+                    .Include(x => x.Clients)
+                    .First();
+
+                var clients = _context.Clients.Where(x => clientsOfPet.Contains(x.Id));
+                foreach (var client in clients)
+                    petViewModel.Pet.Clients.Add(client); 
+
+                var tags = _context.PetTags.Where(x => tagsOfPet.Contains(x.Id));
+                foreach (var tag in tags)
+                    petViewModel.Pet.Tags.Add(tag); 
+
+                pet.Update(petViewModel.Pet);
+
+                await _context.SaveChangesAsync();
+                return RedirectToAction("All");
+            }
+            return RedirectToAction("Update", petViewModel.Pet.Id);
         }
     }
 }

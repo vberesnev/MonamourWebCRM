@@ -61,7 +61,10 @@ namespace MonamourWeb.Controllers
             if (petTag == null)
                 return NotFound();
 
-            var pets = _context.Pets.Where(x => x.Tags.Any(tag => tag.Id == petTag.Id));
+            var pets = _context.Pets
+                                        .Include(x => x.Clients)
+                                        .Include(x => x.Breed)
+                                        .Where(x => x.Tags.Any(tag => tag.Id == petTag.Id));
             var viewModel = new PetTagDetailsViewModel();
             viewModel.PageSettings.PageSize = pageSize ?? 25;
             viewModel.PageSettings.PageSizes = PageSize.GetSelectListItems(pageSize);
