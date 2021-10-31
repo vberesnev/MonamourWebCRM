@@ -1,0 +1,76 @@
+﻿@model MonamourWeb.ViewModels.UserViewModel
+@{
+    ViewData["Title"] = "Редактировать пользователя";
+}
+
+<form method="post" asp-controller="Users" asp-action="UpdatePost">
+    <input asp-for="User.Id" hidden />
+    <div class="border p-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group row">
+            <h2 class="text-black-50 pl-3">Редактировать пользователя</h2>
+        </div>
+
+        <br />
+
+        <table class="table mx-auto table-borderless text-md-center" style="width: 80%">
+            <tr>
+                <td class="w-25">
+                    <label asp-for="User.Name" class="font-weight-bold"></label>
+                </td>
+                <td>
+                    <input asp-for="User.Name" value="@Model.User.Name" class="form-control"/>
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="User.Role" class="font-weight-bold"></label>
+                </td>
+                <td>
+                    <select asp-for="User.RoleId" class="form-control">
+                        <option value="@Model.User.RoleId" selected>@Model.User.Role.Title</option>
+                        @foreach (var item in Model.Roles)
+                        {
+                            if (item.Id == Model.User.RoleId) continue;
+                            <option value="@item.Id">@item.Title</option>
+                        }
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <input type="checkbox" id="passwordCheckbox" onclick="EnableDisablePasswordextBox()"/>
+                    <label for="passwordCheckbox" class="font-weight-bold">Сменить пароль</label>
+                </td>
+                <td>
+                    <input asp-for="User.Password" value="" disabled class="form-control" id="passwordTextbox"/>
+                </td>
+            </tr>
+        </table>
+
+        <br />
+
+        <div class="form-group row">
+            <div class="col-8 offset-2 row">
+                <div class="col">
+                    <input type="submit" class="btn btn-info w-75" value="Сохранить" />
+                </div>
+                <div class="col">
+                    <a class="btn btn-danger w-75" asp-controller="Users" asp-action="All">Назад</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+    function EnableDisablePasswordextBox() {
+        var checkBox = document.getElementById("passwordCheckbox");
+        var textBox = document.getElementById("passwordTextbox");
+        textBox.disabled = checkBox.checked ? false : true;
+        if (!textBox.disabled) {
+            textBox.focus();
+        }
+    }
+</script>
+

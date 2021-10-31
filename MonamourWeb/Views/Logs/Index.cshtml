@@ -1,0 +1,128 @@
+﻿@model MonamourWeb.ViewModels.LogsViewModel
+@{
+    ViewData["Title"] = "Логи";
+}
+
+<div class="container p-3">
+    <div class="row pt-4">
+        <div class="col-6">
+            <h2 class="text-primary">Логи</h2>
+        </div>
+    </div>
+    <br />
+
+    <form asp-controller="Logs" asp-action="Index" method="get">
+        <div class="form-group row pt-4">
+            <div class="3">
+                <input asp-for="@Model.Begin.Value" type="date" class="form-control" name="begin" aria-describedby="Born Date">
+                <input asp-for="@Model.End.Value" type="date" class="form-control" name="end" aria-describedby="Born Date">
+            </div>
+            
+            <div class="col-1">
+                <label mr-3>Показывать</label>
+            </div>
+            <div class="col-1 text-center">
+                <select asp-for="@Model.PageSettings.PageSize" name="pageSize" class="form-control mr-3">
+                    @foreach (var item in Model.PageSettings.PageSizes)
+                    {
+                        @if (item.Value == @Model.PageSettings.PageSize.ToString())
+                        {
+                            <option value="@item.Value" selected>@item.Text</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-3">
+                <input type="text" name="search" class="form-control" value="@Model.PageSettings.Search" />
+            </div>
+            <div class="col-2">
+                <select name="userId" class="form-control">
+                    <option value="">Выберите пользователя</option>
+                    @foreach (var item in Model.Users)
+                    {
+                        @if (item.Id == Convert.ToInt32(Model.UserId))
+                        {
+                            <option value="@item.Id" selected>@item.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-2 btn-group text-right" background-color="red">
+                <input type="submit" value="Поиск" class="btn btn-primary mr-3 btn-sm" />
+                <a class="btn btn-outline-primary btn-sm" asp-controller="Logs" asp-action="Index">Сбросить</a>
+            </div>
+        </div>
+    </form>
+
+    @if (Model.PaginatedList.Any())
+    {
+        <table class="table table-bordered table-striped text-center" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>
+                        <a asp-action="Index"
+                           asp-route-sort=@ViewData["DateSort"]
+                           asp-route-page="@Model.PaginatedList.PageIndex"
+                           asp-route-search="@Model.PageSettings.Search"
+                           asp-route-pageSize="@Model.PageSettings.PageSize">
+                            @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Date)
+                        </a>
+                    </th>
+                    <th>
+                        <a asp-action="Index"
+                           asp-route-sort=@ViewData["UserSort"]
+                           asp-route-page="@Model.PaginatedList.PageIndex"
+                           asp-route-search="@Model.PageSettings.Search"
+                           asp-route-pageSize="@Model.PageSettings.PageSize">
+                            @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.User)
+                        </a>
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Message)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.PaginatedList)
+                {
+                    <tr>
+                        <td width="15%">@item.Date</td>
+                        <td width="15%">@item.User.Name</td>
+                        <td width="70%">@item.Message</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    @{
+        var prevDisabled = !Model.PaginatedList.HasPreviousPage ? "disabled" : "";
+        var nextDisabled = !Model.PaginatedList.HasNextPage ? "disabled" : "";
+        var hidden = Model.PaginatedList.Count == 0 ? "d-none" : "";
+    }
+
+    <a asp-action="Index"
+       asp-route-sort="@Model.PageSettings.Sort"
+       asp-route-page="@(Model.PaginatedList.PageIndex - 1)"
+       asp-route-search="@Model.PageSettings.Search"
+       asp-route-pageSize="@Model.PageSettings.PageSize"
+       class="btn btn-default @prevDisabled @hidden">
+        <- Назад
+    </a>
+    <a asp-action="Index"
+       asp-route-sort="@Model.PageSettings.Sort"
+       asp-route-page="@(Model.PaginatedList.PageIndex + 1)"
+       asp-route-search="@Model.PageSettings.Search"
+       asp-route-pageSize="@Model.PageSettings.PageSize"
+       class="btn btn-default @nextDisabled @hidden">
+        Вперёд ->
+    </a>
+</div>
+

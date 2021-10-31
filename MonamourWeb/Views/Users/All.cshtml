@@ -1,0 +1,89 @@
+﻿@model IEnumerable<MonamourWeb.Models.User>
+@{
+    ViewData["Title"] = "Пользователи";
+}
+
+<div class="container p-3">
+    <div class="row pt-4">
+        <div class="col-6">
+            <h4 class="text-primary">Пользователи</h4>
+        </div>
+        <div class="col-6 text-right">
+            <a class="btn btn-success" asp-area="" asp-controller="Users" asp-action="Create">Добавить</a>
+        </div>
+    </div>
+    <br />
+    
+    <form asp-controller="Users" asp-action="All" method="get">
+        <div class="form-group row pt-4">
+            <div class="col-9 d-flex">
+                <span class="fa fa-filter fa-lg mt-auto mb-auto mr-1"></span>
+                <input type="text" name="search" class="form-control" value="@ViewData["CurrentSearch"]" />
+            </div>
+            <div class="col-3 btn-group text-right" background-color="red">
+                <input type="submit" value="Поиск" class="btn btn-primary mr-3 btn-sm"/>
+                <a class="btn btn-outline-primary btn-sm" asp-controller="Users" asp-action="All">Сбросить</a>
+            </div>
+        </div>
+    </form>
+
+    @if (Model.Count() > 0)
+    {
+        <table class="table table-bordered table-striped text-center" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>
+                        <a asp-action="All" asp-route-sort=@ViewData["NameSort"]>@Html.DisplayNameFor(model => model.Name)</a>
+                    </th>
+                    <th>
+                        <a asp-action="All" asp-route-sort=@ViewData["RoleSort"]>@Html.DisplayNameFor(model => model.Role)</a>
+                    </th>
+                    <th>
+                        <a asp-action="All" asp-route-sort=@ViewData["BlockedSort"]>@Html.DisplayNameFor(model => model.Blocked)</a>
+                    </th>
+                    <th>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td width="30%">@item.Name</td>
+                        <td width="20%">@item.Role.Title</td>
+                        <td width="20%">
+                            @if (item.Blocked)
+                            {
+                                <p>Да</p>
+                            }
+                            else
+                            {
+                                <p>Нет</p>
+                            }
+                        </td>
+                        <td width="5%">
+                            <div class="w-100 btn-group" role="group">
+                                <a asp-controller="Users" asp-action="Update" asp-route-Id="@item.Id" class="btn btn-primary mx-1">
+                                    <span class="fa fa-pen"></span>
+                                </a>
+                                @if (item.Blocked)
+                                {
+                                    <a asp-controller="Users" asp-action="Unblock" asp-route-Id="@item.Id" class="btn btn-success mx-1">
+                                        <span class="fa fa-plus"></span>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Users" asp-action="Block" asp-route-Id="@item.Id" class="btn btn-danger mx-1">
+                                        <span class="fa fa-ban"></span>
+                                    </a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+

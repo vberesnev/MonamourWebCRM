@@ -1,0 +1,147 @@
+﻿@model MonamourWeb.ViewModels.ProceduresAllViewModel
+@{
+    ViewData["Title"] = "Процедуры";
+}
+
+<div class="container p-3">
+    <div class="row pt-4">
+        <div class="col-6">
+            <h4 class="text-primary">Процедуры</h4>
+        </div>
+        <div class="col-6 text-right">
+            <a class="btn btn-success" asp-area="" asp-controller="Procedures" asp-action="Create">Добавить</a>
+        </div>
+    </div>
+    <br />
+
+    <form asp-controller="Procedures" asp-action="All" method="get">
+        <div class="form-group row pt-4">
+            <div class="col-2 d-flex">
+                <span class="fa fa-binoculars fa-lg mt-auto mb-auto mr-1"></span>
+                <select asp-for="@Model.PageSettings.PageSize" name="pageSize" class="form-control mr-3">
+                    @foreach (var item in Model.PageSettings.PageSizes)
+                    {
+                        @if (item.Value == @Model.PageSettings.PageSize.ToString())
+                        {
+                            <option value="@item.Value" selected>@item.Text</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-5 d-flex">
+                <span class="fa fa-filter fa-lg mt-auto mb-auto mr-1"></span>
+                <input type="text" name="search" class="form-control" value="@Model.PageSettings.Search" />
+            </div>
+            <div class="col-3">
+                <select name="animalId" class="form-control">
+                    <option value="">Выберите животное</option>
+                    @foreach (var item in Model.Animals)
+                    {
+                        @if (item.Id == Convert.ToInt32(Model.AnimalId))
+                        {
+                            <option value="@item.Id" selected>@item.Title</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Id">@item.Title</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-2 btn-group text-right" background-color="red">
+                <input type="submit" value="Поиск" class="btn btn-primary mr-3 btn-sm" />
+                <a class="btn btn-outline-primary btn-sm" asp-controller="Procedures" asp-action="All">Сбросить</a>
+            </div>
+        </div>
+    </form>
+
+    @if (Model.PaginatedList.Any())
+    {
+        <table class="table table-bordered table-striped text-center" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>
+                        <a asp-action="All"
+                           asp-route-sort=@ViewData["TitleSort"]
+                           asp-route-page="@Model.PaginatedList.PageIndex"
+                           asp-route-search="@Model.PageSettings.Search"
+                           asp-route-pageSize="@Model.PageSettings.PageSize">
+                            @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Title)
+                        </a>
+                    </th>
+                    <th>
+                        <a asp-action="All"
+                           asp-route-sort=@ViewData["AnimalSort"]
+                           asp-route-page="@Model.PaginatedList.PageIndex"
+                           asp-route-search="@Model.PageSettings.Search"
+                           asp-route-pageSize="@Model.PageSettings.PageSize">
+                            @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Animal)
+                        </a>
+                    </th>
+                    <th>
+                        <a asp-action="All"
+                           asp-route-sort=@ViewData["CostSort"]
+                           asp-route-page="@Model.PaginatedList.PageIndex"
+                           asp-route-search="@Model.PageSettings.Search"
+                           asp-route-pageSize="@Model.PageSettings.PageSize">
+                            @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Cost)
+                        </a>
+                    </th>
+                    <th>
+                        <a>@Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Info)</a>
+                    </th>
+                    <th>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.PaginatedList)
+                {
+                    <tr>
+                        <td width="30%">@item.Title</td>
+                        <td width="20%">@item.Animal.Title</td>
+                        <td width="10%">@item.Cost</td>
+                        <td width="35%">@item.Info</td>
+                        <td width="5%">
+                            <div class="w-100 btn-group" role="group">
+                                <a asp-controller="Procedures" asp-action="Update" asp-route-Id="@item.Id" class="btn btn-primary mx-1">
+                                    <span class="fa fa-pen"></span>
+                                </a>
+                                <a asp-controller="Procedures" asp-action="Delete" asp-route-Id="@item.Id" class="btn btn-danger mx-1">
+                                    <span class="fa fa-trash"></span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    @{
+        var prevDisabled = !Model.PaginatedList.HasPreviousPage ? "disabled" : "";
+        var nextDisabled = !Model.PaginatedList.HasNextPage ? "disabled" : "";
+        var hidden = Model.PaginatedList.Count == 0 ? "d-none" : "";
+    }
+
+    <a asp-action="All"
+       asp-route-sort="@Model.PageSettings.Sort"
+       asp-route-page="@(Model.PaginatedList.PageIndex - 1)"
+       asp-route-search="@Model.PageSettings.Search"
+       asp-route-pageSize="@Model.PageSettings.PageSize"
+       class="btn btn-default @prevDisabled @hidden">
+        <- Назад
+    </a>
+    <a asp-action="All"
+       asp-route-sort="@Model.PageSettings.Sort"
+       asp-route-page="@(Model.PaginatedList.PageIndex + 1)"
+       asp-route-search="@Model.PageSettings.Search"
+       asp-route-pageSize="@Model.PageSettings.PageSize"
+       class="btn btn-default @nextDisabled @hidden">
+        Вперёд ->
+    </a>
+</div>
+

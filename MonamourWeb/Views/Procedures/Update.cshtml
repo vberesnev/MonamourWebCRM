@@ -1,0 +1,73 @@
+﻿@model MonamourWeb.ViewModels.ProcedureViewModel
+@{
+    ViewData["Title"] = "Редактировать процедуру";
+}
+
+<form method="post" asp-controller="Procedures" asp-action="UpdatePost">
+    <input asp-for="Procedure.Id" hidden />
+    <div class="border p-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group row">
+            <h2 class="text-black-50 pl-3">Редактировать процедуру</h2>
+        </div>
+
+        <br />
+
+        <table class="table mx-auto table-borderless text-md-center" style="width: 80%">
+            <tr>
+                <td class="w-25">
+                    <label asp-for="Procedure.Title" class="font-weight-bold"></label>
+                </td>
+                <td>
+                    <input asp-for="Procedure.Title" value="@Model.Procedure.Title" class="form-control" />
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="Procedure.Animal" class="font-weight-bold"></label>
+                </td>
+                <td>
+                    <select asp-for="Procedure.AnimalId" class="form-control">
+                        <option value="@Model.Procedure.AnimalId" selected>@Model.Procedure.Animal.Title</option>
+                        @foreach (var item in Model.Animals)
+                        {
+                            if (item.Id == Model.Procedure.AnimalId) continue;
+                            <option value="@item.Id">@item.Title</option>
+                        }
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="Procedure.Cost" class="font-weight-bold"></label>
+                </td>
+                <td>
+                    <input asp-for="Procedure.Cost" value="@Model.Procedure.Cost" class="form-control" />
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="Procedure.Info" class="font-weight-bold"></label>
+                </td>
+                <td>
+                    <input asp-for="Procedure.Info" value="@Model.Procedure.Info" class="form-control" />
+                </td>
+            </tr>
+
+        </table>
+
+        <br />
+
+        <div class="form-group row">
+            <div class="col-8 offset-2 row">
+                <div class="col">
+                    <input type="submit" class="btn btn-info w-75" value="Сохранить" />
+                </div>
+                <div class="col">
+                    <a class="btn btn-danger w-75" asp-controller="Procedures" asp-action="All">Назад</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+

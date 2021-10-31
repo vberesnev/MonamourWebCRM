@@ -1,0 +1,177 @@
+﻿@model MonamourWeb.ViewModels.ClientsAllViewModel
+@{
+    ViewData["Title"] = "Клиенты";
+}
+
+<div class="container p-3">
+    <div class="row pt-4">
+        <div class="col-6">
+            <h4 class="text-primary">Клиенты</h4>
+        </div>
+        <div class="col-6 text-right">
+            <a class="btn btn-success" asp-area="" asp-controller="Clients" asp-action="Create">Добавить</a>
+        </div>
+    </div>
+    <br />
+
+    <form asp-controller="Clients" asp-action="All" method="get">
+        <div class="form-group row pt-4">
+            <div class="col-2 d-flex">
+                <span class="fa fa-binoculars fa-lg mt-auto mb-auto mr-1"></span>
+                <select asp-for="@Model.PageSettings.PageSize" name="pageSize" class="form-control ml-1">
+                    @foreach (var item in Model.PageSettings.PageSizes)
+                    {
+                        @if (item.Value == @Model.PageSettings.PageSize.ToString())
+                        {
+                            <option value="@item.Value" selected>@item.Text</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-5 d-flex">
+                <span class="fa fa-filter fa-lg mt-auto mb-auto mr-1"></span>
+                <input type="text" name="search" class="form-control ml-1" value="@Model.PageSettings.Search"/>
+            </div>
+            <div class="col-3">
+                <select name="tagId" class="form-control">
+                    <option value="">Выберите тег</option>
+                    @foreach (var item in Model.Tags)
+                    {
+                        @if (item.Id == Convert.ToInt32(Model.TagId))
+                        {
+                            <option value="@item.Id" selected>@item.Title</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Id">@item.Title</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-2 btn-group text-right" background-color="red">
+                <input type="submit" value="Поиск" class="btn btn-primary mr-3 btn-sm" />
+                <a class="btn btn-outline-primary btn-sm" asp-controller="Clients" asp-action="All">Сбросить</a>
+            </div>
+        </div>
+    </form>
+
+    @if (Model.PaginatedList.Any())
+    {
+        <table class="table table-bordered table-striped text-center" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>
+                        <a asp-action="All"
+                           asp-route-sort=@ViewData["NameSort"]
+                           asp-route-page="@Model.PaginatedList.PageIndex"
+                           asp-route-search="@Model.PageSettings.Search"
+                           asp-route-pageSize="@Model.PageSettings.PageSize">
+                            @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Name)
+                        </a>
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Pets)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Tags)
+                    </th>
+                    <th>
+                        <a>@Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Phone)</a>
+                    </th>
+                    <th>
+                        <a asp-action="All"
+                           asp-route-sort=@ViewData["BonusSort"]
+                           asp-route-page="@Model.PaginatedList.PageIndex"
+                           asp-route-search="@Model.PageSettings.Search"
+                           asp-route-pageSize="@Model.PageSettings.PageSize">
+                            @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Bonus)
+                        </a>
+                    </th>
+                    <th>
+                        <a>@Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Info)</a>
+                    </th>
+                    <th>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.PaginatedList)
+                {
+                    <tr>
+                        <td width="20%">
+                            <a asp-controller="Clients" asp-action="Details" asp-route-Id="@item.Id">@item.Name</a>
+                        </td>
+                        <td width="20%">
+                            @foreach (var pet in item.Pets)
+                            {
+                                <a asp-controller="Pets" asp-action="Details" asp-route-Id="@pet.Id">@pet.Name</a><br />
+                            }
+                        </td>
+                        <td width="10%">
+                            @foreach (var tag in item.Tags)
+                            {
+                                <a style="background-color: @tag.Color; color: white; padding: 3px; width: 30px; text-align: center; text-decoration: none; display: inline-block; border-radius: 4px"
+                                   asp-controller="ClientTags" asp-action="Details" asp-route-Id="@tag.Id">
+                                    @tag.ShortTitle
+                                </a>
+                            }
+                        </td>
+                        <td width="15%">
+                            @if (Context.User.IsInRole("Admin"))
+                            {
+                                @item.Phone
+                            }
+                            else
+                            {
+                                @item.SecretPhone
+                            }
+                        </td>
+                        <td width="5%">@item.Bonus</td>
+                        <td width="25%">@item.ShortInfo</td>
+                        <td width="5%">
+                            <div class="w-100 btn-group" role="group">
+                                <a asp-controller="Clients" asp-action="Update" asp-route-Id="@item.Id" class="btn btn-primary mx-1">
+                                    <span class="fa fa-pen"></span>
+                                </a>
+                                @if (Context.User.IsInRole("Admin"))
+                                {
+                                    <a asp-controller="Clients" asp-action="Delete" asp-route-Id="@item.Id" class="btn btn-danger mx-1">
+                                        <span class="fa fa-trash"></span>
+                                    </a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    @{
+        var prevDisabled = !Model.PaginatedList.HasPreviousPage ? "disabled" : "";
+        var nextDisabled = !Model.PaginatedList.HasNextPage ? "disabled" : "";
+        var hidden = Model.PaginatedList.Count == 0 ? "d-none" : "";
+    }
+
+    <a asp-action="All"
+       asp-route-sort="@Model.PageSettings.Sort"
+       asp-route-page="@(Model.PaginatedList.PageIndex - 1)"
+       asp-route-search="@Model.PageSettings.Search"
+       asp-route-pageSize="@Model.PageSettings.PageSize"
+       class="btn btn-default @prevDisabled @hidden @hidden">
+        <- Назад
+    </a>
+    <a asp-action="All"
+       asp-route-sort="@Model.PageSettings.Sort"
+       asp-route-page="@(Model.PaginatedList.PageIndex + 1)"
+       asp-route-search="@Model.PageSettings.Search"
+       asp-route-pageSize="@Model.PageSettings.PageSize"
+       class="btn btn-default @nextDisabled @hidden @hidden">
+        Вперёд ->
+    </a>
+</div>
+

@@ -1,0 +1,54 @@
+﻿@using System.Collections
+@model IEnumerable<MonamourWeb.Models.Animal>
+@{
+    ViewData["Title"] = "Животные";
+}
+
+<div class="container p-3">
+    <div class="row pt-4">
+        <div class="col-6">
+            <h4 class="text-primary">Животные</h4>
+        </div>
+        <div class="col-6 text-right">
+            <a class="btn btn-success" asp-controller="Animals" asp-action="Create">Добавить</a>
+        </div>
+    </div>
+    <br />
+
+    @if (Model.Any())
+    {
+        <table class="table table-bordered table-striped text-center" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>
+                        <a asp-action="All" asp-route-sort=@ViewData["NameSort"]>@Html.DisplayNameFor(model => model.Title)</a>
+                    </th>
+                    <th>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Title</td>
+                        <td width="5%">
+                            <div class="w-100 btn-group" role="group">
+                                <a asp-controller="Animals" asp-action="Update" asp-route-Id="@item.Id" class="btn btn-primary mx-1">
+                                    <span class="fa fa-pen"></span>
+                                </a>
+                                @if (Context.User.IsInRole("Admin"))
+                                {
+                                    <a asp-controller="Animals" asp-action="Delete" asp-route-Id="@item.Id" class="btn btn-danger mx-1">
+                                        <span class="fa fa-trash"></span>
+                                    </a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+

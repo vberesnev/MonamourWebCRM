@@ -1,0 +1,151 @@
+﻿@model MonamourWeb.ViewModels.ClientTagDetailsViewModel
+@{
+    ViewData["Title"] = "Клиентский тег " + @Model.ClientTag.Title;
+}
+
+<input asp-for="@Model.ClientTag.Id" hidden />
+<div class="border p-3">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group row">
+        <h4 class="text-black-50 pl-3">Клиентский тег @Model.ClientTag.Title</h4>
+    </div>
+
+    <br />
+
+    <table class="table mx-auto table-borderless text-md-center" style="width: 50%">
+        <tr>
+            <td class="w-25">
+                <label asp-for="@Model.ClientTag.Title" class="font-weight-bold"></label>
+            </td>
+            <td>
+                <text>@Model.ClientTag.Title</text>
+            </td>
+        </tr>
+        <tr>
+            <td class="w-25">
+                <label asp-for="@Model.ClientTag.ShortTitle" class="font-weight-bold"></label>
+            </td>
+            <td>
+                <text>@Model.ClientTag.ShortTitle</text>
+            </td>
+        </tr>
+        <tr>
+            <td class="w-25">
+                <label asp-for="@Model.ClientTag.Color" class="font-weight-bold"></label>
+            </td>
+            <td>
+                <div margin="auto" style="margin: 0 auto; width: 30px; height: 30px; background-color: @Model.ClientTag.Color"></div>
+            </td>
+        </tr>
+    </table>
+
+    <br />
+
+    <div class="form-group row">
+        <div class="col-8 offset-2 row">
+            @if (Context.User.IsInRole("Admin"))
+            {
+                <div class="col">
+                    <a asp-controller="ClientTags" asp-action="Update" asp-route-Id="@Model.ClientTag.Id" class="btn btn-info w-75">Редактировать</a>
+                </div>
+            }
+            <div class="col">
+                <a class="btn btn-info w-75" asp-controller="ClientTags" asp-action="All">Назад</a>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.PaginatedList.Any())
+    {
+        <table class="table table-bordered table-striped text-center" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Name)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Pets)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Phone)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Bonus)
+                    </th>
+                    <th>
+                        <a>@Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Info)</a>
+                    </th>
+                    <th>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.PaginatedList)
+                {
+                <tr>
+                    <td width="25%">
+                        <a asp-controller="Clients" asp-action="Details" asp-route-Id="@item.Id">@item.Name</a><br />
+                    </td>
+                    <td width="20%">
+                        @foreach (var pet in item.Pets)
+                        {
+                            <a asp-controller="Pets" asp-action="Details" asp-route-Id="@pet.Id">@pet.Name</a><br />
+                        }
+                    </td>
+                    @if (Context.User.IsInRole("Admin"))
+                    {
+                        <td width="15%">@item.Phone</td>
+                    }
+                    else
+                    {
+                        <td width="15%">@item.SecretPhone</td>
+                    }
+                    <td width="5%">@item.Bonus</td>
+                    <td width="30%">@item.ShortInfo</td>
+                    <td width="5%">
+                        <div class="w-100 btn-group" role="group">
+                            <a asp-controller="Clients" asp-action="Update" asp-route-Id="@item.Id" class="btn btn-primary mx-1">
+                                <span class="fa fa-pen"></span>
+                            </a>
+                            @if (Context.User.IsInRole("Admin"))
+                            {
+                                <a asp-controller="Clients" asp-action="Delete" asp-route-Id="@item.Id" class="btn btn-danger mx-1">
+                                    <span class="fa fa-trash"></span>
+                                </a>
+                            }
+                        </div>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="form-group row">
+            <h6 class="text-black-50 pl-3">Нет клиентов с тегом  @Model.ClientTag.Title</h6>
+        </div>
+    }
+
+    @{
+        var prevDisabled = !Model.PaginatedList.HasPreviousPage ? "disabled" : "";
+        var nextDisabled = !Model.PaginatedList.HasNextPage ? "disabled" : "";
+        var hidden = Model.PaginatedList.Count == 0 ? "d-none" : "";
+    }
+
+    <a asp-action="Details"
+       asp-route-id="@Model.ClientTag.Id"
+       asp-route-page="@(Model.PaginatedList.PageIndex - 1)"
+       asp-route-pageSize="@Model.PageSettings.PageSize"
+       class="btn btn-default @prevDisabled @hidden">
+        <- Назад
+    </a>
+    <a asp-action="Details"
+       asp-route-id="@Model.ClientTag.Id"
+       asp-route-page="@(Model.PaginatedList.PageIndex + 1)"
+       asp-route-pageSize="@Model.PageSettings.PageSize"
+       class="btn btn-default @nextDisabled @hidden">
+        Вперёд ->
+    </a>
+</div>
+

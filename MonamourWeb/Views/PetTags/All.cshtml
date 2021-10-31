@@ -1,0 +1,69 @@
+﻿@model IEnumerable<MonamourWeb.Models.PetTag>
+@{
+    ViewData["Title"] = "Теги питомцев";
+}
+
+<div class="container p-3">
+    <div class="row pt-4">
+        <div class="col-6">
+            <h4 class="text-primary">Теги питомцев</h4>
+        </div>
+        <div class="col-6 text-right">
+            <a class="btn btn-primary" asp-area="" asp-controller="PetTags" asp-action="Create">Добавить</a>
+        </div>
+    </div>
+    <br />
+
+    @if (Model.Any())
+    {
+        <table class="table table-bordered table-striped text-center" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>
+                        Тег
+                    </th>
+                    <th>
+                        Тег короткий
+                    </th>
+                    <th>
+                        Цвет
+                    </th>
+                    @if (Context.User.IsInRole("Admin"))
+                    {
+                        <th>
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td width="40%">
+                            <a asp-controller="PetTags" asp-action="Details" asp-route-id="@item.Id">@item.Title</a>
+                        </td>
+                        <td width="25%" style="font-weight: bold">
+                            @item.ShortTitle
+                        </td>
+                        <td width="25%">
+                            <div margin="auto" style="margin: 0 auto; width: 30px; height: 30px; background-color: @item.Color"></div>
+                        </td>
+                        @if (Context.User.IsInRole("Admin"))
+                        {
+                            <td width="10%">
+                                <div class="w-100 btn-group" role="group">
+                                    <a asp-controller="PetTags" asp-action="Update" asp-route-Id="@item.Id" class="btn btn-primary mx-1">
+                                        <span class="fa fa-pen"></span>
+                                    </a>
+                                    <a asp-controller="PetTags" asp-action="Delete" asp-route-Id="@item.Id" class="btn btn-danger mx-1">
+                                        <span class="fa fa-trash"></span>
+                                    </a>
+                                </div>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

@@ -1,0 +1,56 @@
+﻿@model MonamourWeb.Models.PetTag
+@{
+    ViewData["Title"] = "Удалить тег питомца";
+}
+
+<form method="post" asp-controller="PetTags" asp-action="DeletePost">
+    <input asp-for="Id" hidden/>
+    <div class="border p-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group row">
+            <h2 class="text-black-50 pl-3">Удалить тег питомца</h2>
+        </div>
+
+        <br />
+
+        <table class="table mx-auto table-borderless text-md-center" style="width: 50%">
+            <tr>
+                <td class="w-25">
+                    <label asp-for="Title" class="font-weight-bold"></label>
+                </td>
+                <td>
+                    <text>@Model.Title</text>
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="ShortTitle" class="font-weight-bold"></label>
+                </td>
+                <td>
+                    <text>@Model.ShortTitle</text>
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="Color" class="font-weight-bold"></label>
+                </td>
+                <td>
+                    <text>@Model.Color</text>
+                </td>
+            </tr>
+        </table>
+
+        <br />
+
+        <div class="form-group row">
+            <div class="col-8 offset-2 row">
+                <div class="col">
+                    <input type="submit" class="btn btn-danger w-75" value="Удалить" />
+                </div>
+                <div class="col">
+                    <a class="btn btn-info w-75" asp-controller="PetTags" asp-action="All">Назад</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

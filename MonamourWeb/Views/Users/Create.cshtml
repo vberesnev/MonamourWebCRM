@@ -1,0 +1,63 @@
+﻿@model MonamourWeb.ViewModels.UserViewModel
+@{
+    ViewData["Title"] = "Добавить пользователя";
+}
+<form method="post" asp-controller="Users" asp-action="Create">
+    <div class="border p-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group row">
+            <h2 class="text-black-50 pl-3">Добавить пользователя</h2>
+        </div>
+
+        <br/>
+        
+        <table class="table table-borderless text-center" style="width: 100%">
+            <tr>
+                <td>
+                    <label asp-for="User.Name"></label>
+                </td>
+                <td>
+                    <input asp-for="User.Name" class="form-control"/>
+                    <span asp-validation-for="User.Name" class="text-danger"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label asp-for="User.Role"></label>
+                </td>
+                <td>
+                    <select asp-for="User.RoleId" class="form-control">
+                        <option value="">Выберите роль</option>
+                        @foreach (var item in Model.Roles)
+                        {
+                            <option value="@item.Id">@item.Title</option>
+                        }
+                    </select>
+                    <span asp-validation-for="User.RoleId" class="text-danger"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label asp-for="User.Password"></label>
+                </td>
+                <td>
+                    <input asp-for="User.Password" class="form-control" />
+                    <span asp-validation-for="User.Password" class="text-danger"></span>
+                </td>
+            </tr>
+        </table>
+        
+        <br/>
+
+        <div class="form-group row">
+            <div class="col-8 offset-2 row">
+                <div class="col">
+                    <input type="submit" class="btn btn-info w-75" value="Добавить"/>
+                </div>
+                <div class="col">
+                    <a class="btn btn-danger w-75" asp-controller="Users" asp-action="All">Назад</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

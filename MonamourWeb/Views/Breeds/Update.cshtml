@@ -1,0 +1,56 @@
+﻿@model MonamourWeb.ViewModels.BreedViewModel
+@{
+    ViewData["Title"] = "Редактировать породу";
+}
+
+<form method="post" asp-controller="Breeds" asp-action="UpdatePost">
+    <input asp-for="Breed.Id" hidden />
+    <div class="border p-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group row">
+            <h2 class="text-black-50 pl-3">Редактировать породу</h2>
+        </div>
+
+        <br />
+
+        <table class="table mx-auto table-borderless text-md-center" style="width: 80%">
+            <tr>
+                <td class="w-25">
+                    <label asp-for="Breed.Title" class="font-weight-bold"></label>
+                </td>
+                <td>
+                    <input asp-for="Breed.Title" value="@Model.Breed.Title" class="form-control" />
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="Breed.Animal" class="font-weight-bold"></label>
+                </td>
+                <td>
+                    <select asp-for="Breed.AnimalId" class="form-control">
+                        <option value="@Model.Breed.AnimalId" selected>@Model.Breed.Animal.Title</option>
+                        @foreach (var item in Model.Animals)
+                        {
+                            if (item.Id == Model.Breed.AnimalId) continue;
+                            <option value="@item.Id">@item.Title</option>
+                        }
+                    </select>
+                </td>
+            </tr>
+        </table>
+
+        <br />
+
+        <div class="form-group row">
+            <div class="col-8 offset-2 row">
+                <div class="col">
+                    <input type="submit" class="btn btn-info w-75" value="Сохранить" />
+                </div>
+                <div class="col">
+                    <a class="btn btn-danger w-75" asp-controller="Breeds" asp-action="All">Назад</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+

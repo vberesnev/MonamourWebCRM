@@ -1,0 +1,39 @@
+﻿@model MonamourWeb.Models.Animal
+@{
+    ViewData["Title"] = "Добавить животное";
+}
+<form method="post" asp-controller="Animals" asp-action="Create">
+    <div class="border p-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group row">
+            <h2 class="text-black-50 pl-3">Добавить животное</h2>
+        </div>
+
+        <br />
+
+        <table class="table table-borderless text-center" style="width: 100%">
+            <tr>
+                <td>
+                    <label asp-for="Title"></label>
+                </td>
+                <td>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </td>
+            </tr>
+        </table>
+
+        <br />
+
+        <div class="form-group row">
+            <div class="col-8 offset-2 row">
+                <div class="col">
+                    <input type="submit" class="btn btn-info w-75" value="Добавить" />
+                </div>
+                <div class="col">
+                    <a class="btn btn-danger w-75" asp-controller="Animals" asp-action="All">Назад</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

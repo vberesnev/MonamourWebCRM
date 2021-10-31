@@ -1,0 +1,65 @@
+﻿@model MonamourWeb.Models.ClientTag
+@{
+    ViewData["Title"] = "Редактировать тег клиента";
+}
+
+<form method="post" asp-controller="ClientTags" asp-action="UpdatePost">
+    <input asp-for="Id" hidden />
+    <div class="border p-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group row">
+            <h2 class="text-black-50 pl-3">Редактировать тег клиента</h2>
+        </div>
+
+        <br />
+
+        <table class="table mx-auto table-borderless text-md-center" style="width: 100%">
+            <tr>
+                <td class="w-25">
+                    <label asp-for="Title" class="font-weight-bold"></label>
+                </td>
+                <td>
+                    <input asp-for="Title" value="@Model.Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="ShortTitle" class="font-weight-bold"></label>
+                </td>
+                <td>
+                    <input asp-for="ShortTitle" value="@Model.ShortTitle" class="form-control" />
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="Color" class="font-weight-bold"></label>
+                </td>
+                <td>
+                    <select asp-for="Color" class="form-control">
+                        <option value="@Model.Color" selected>@Model.Color</option>
+                        @foreach (var item in ViewBag.Colors)
+                        {
+                            if (item == Model.Color) continue;
+                            <option value="@item">@item</option>
+                        }
+                    </select>
+                </td>
+            </tr>
+        </table>
+
+        <br />
+
+        <div class="form-group row">
+            <div class="col-8 offset-2 row">
+                <div class="col">
+                    <input type="submit" class="btn btn-info w-75" value="Сохранить" />
+                </div>
+                <div class="col">
+                    <a class="btn btn-danger w-75" asp-controller="ClientTags" asp-action="All">Назад</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+

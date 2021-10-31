@@ -1,0 +1,49 @@
+﻿@model MonamourWeb.Models.User
+@{
+    ViewData["Title"] = "Разблокировать пользователя";
+}
+
+<form method="post" asp-controller="Users" asp-action="UnblockPost">
+    <input asp-for="Id" hidden/>
+    <div class="border p-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group row">
+            <h2 class="text-black-50 pl-3">Разблокировать пользователя</h2>
+        </div>
+
+        <br />
+
+        <table class="table mx-auto table-borderless text-md-center" style="width: 50%">
+            <tr>
+                <td class="w-25"> 
+                    <label asp-for="Name" class="font-weight-bold"></label>
+                </td>
+                <td>
+                    <text>@Model.Name</text>
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="Role" class="font-weight-bold"></label>
+                </td>
+                <td>
+                    <text class="">@Model.Role.Title</text>
+                </td>
+            </tr>
+        </table>
+
+        <br />
+
+        <div class="form-group row">
+            <div class="col-8 offset-2 row">
+                <div class="col">
+                    <input type="submit" class="btn btn-success w-75" value="Разблокировать" />
+                </div>
+                <div class="col">
+                    <a class="btn btn-info w-75" asp-controller="Users" asp-action="All">Назад</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+

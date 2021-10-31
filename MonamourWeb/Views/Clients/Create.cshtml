@@ -1,0 +1,249 @@
+﻿@model MonamourWeb.ViewModels.ClientViewModel
+@{
+    ViewData["Title"] = "Добавить клиента";
+}
+<form method="post" asp-controller="Clients" asp-action="Create">
+    <div class="border p-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group row">
+            <h2 class="text-black-50 pl-3">Добавить клиента</h2>
+        </div>
+
+        <table class="table table-borderless text-center" style="width: 100%">
+            <tr>
+                <td>
+                    <label asp-for="@Model.Client.Name"></label>
+                </td>
+                <td colspan="2">
+                    <input asp-for="@Model.Client.Name" class="form-control" />
+                    <span asp-validation-for="@Model.Client.Name" class="text-danger"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label asp-for="@Model.Client.Phone"></label>
+                </td>
+                <td colspan="2">
+                    <input asp-for="@Model.Client.Phone" class="form-control" />
+                    <span asp-validation-for="@Model.Client.Phone" class="text-danger"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label asp-for="@Model.Client.Email"></label>
+                </td>
+                <td colspan="2">
+                    <input asp-for="@Model.Client.Email" class="form-control" />
+                    <span asp-validation-for="@Model.Client.Email" class="text-danger"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label asp-for="@Model.Client.Instagram"></label>
+                </td>
+                <td colspan="2">
+                    <input asp-for="@Model.Client.Instagram" class="form-control" />
+                    <span asp-validation-for="@Model.Client.Instagram" class="text-danger"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label asp-for="@Model.Client.Social"></label>
+                </td>
+                <td colspan="2">
+                    <input asp-for="@Model.Client.Social" class="form-control" />
+                    <span asp-validation-for="@Model.Client.Social" class="text-danger"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label asp-for="@Model.Client.Info"></label>
+                </td>
+                <td colspan="2">
+                    <textarea style="height: 50px" asp-for="@Model.Client.Info" class="form-control"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label asp-for="@Model.Client.Bonus"></label>
+                </td>
+                <td colspan="2">
+                    <input asp-for="@Model.Client.Bonus" class="form-control" />
+                    <span asp-validation-for="@Model.Client.Bonus" class="text-danger"></span>
+                </td>
+            </tr>
+
+            @*Pets*@
+
+            <tr>
+                <td width="20%">
+                    <label asp-for="@Model.Client.Pets"></label>
+                </td>
+                <td width="40%">
+                    <select multiple id="clientsPets" class="form-control">
+                        @foreach (var item in Model.Client.Pets)
+                        {
+                            <option ondblclick="removePetFromClientFunc('@item.Id')" value="@item.Id">@item.Name (@item.Breed.Title)</option>
+                        }
+                    </select>
+                </td>
+                <td width="40%">
+                    <div>
+                        <input type="text" id="petSearchTextBox" class="form-control mb-1" />
+                        <select multiple id="petSelector" class="form-control">
+                        </select>
+                    </div>
+                </td>
+                <td>
+                    <div id="divPetsIdList">
+                        @foreach (var pet in Model.Client.Pets)
+                        {
+                            <input type="hidden" class="petHidden" name="clientPets" value="@pet.Id" />
+                        }
+                    </div>
+                </td>
+            </tr>
+
+            @*TAGS*@
+
+            <tr>
+                <td width="20%">
+                    <label asp-for="@Model.Client.Tags"></label>
+                </td>
+                <td width="40%">
+                    <select multiple id="clientsTags" class="form-control">
+                        @foreach (var item in Model.Client.Tags)
+                        {
+                            <option ondblclick="removeTagFromClientFunc('@item.Id')" value="@item.Id">@item.Title</option>
+                        }
+                    </select>
+                </td>
+                <td width="40%">
+                    <select multiple id="allTags" class="form-control">
+                        @foreach (var item in Model.AllTags)
+                        {
+                            <option ondblclick="addTagToClientFunc('@item.Id', '@item.Title')" value="@item.Id">@item.Title</option>
+                        }
+                    </select>
+                </td>
+                <td>
+                    <div id="divTagIdList">
+                        @foreach (var tag in Model.Client.Tags)
+                        {
+                            <input type="text" name="clientTags" value="@tag.Id" />
+                        }
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <div class="form-group row">
+            <div class="col-8 offset-2 row">
+                <div class="col">
+                    <input type="submit" class="btn btn-info w-75" value="Добавить" />
+                </div>
+                <div class="col">
+                    <a class="btn btn-danger w-75" asp-controller="Clients" asp-action="All">Назад</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript">
+
+    $(function () {
+        $("#petSearchTextBox").keyup(function () {
+            SearchPetAjax();
+        });
+    });
+
+    function SearchPetAjax() {
+        var pet = $.trim($("#petSearchTextBox").val());
+        $.ajax({
+            type: "post",
+            url: "/Clients/SearchPet",
+            data: JSON.stringify(pet),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (pets) {
+                var select = document.getElementById('petSelector');
+                select.innerHTML = "";
+
+                for (var i = 0; i < pets.length; i++) {
+                    select.innerHTML += '<option ondblclick="addPetToClientFunc(\'' + pets[i].id + '\', \'' + pets[i].name + ' (' + pets[i].breed.title + ')' + '\')" value="' + pets[i].id + '">' + pets[i].name + ' (' + pets[i].breed.title + ')' + '</option>';
+                }
+            }
+        });
+    }
+
+    function addPetToClientFunc(id, title) {
+        var select = document.getElementById('clientsPets');
+
+        for (var i = 0; i < select.length; i++) {
+            if (select[i].value === id) {
+                return;
+            }
+        }
+
+        select.innerHTML += '<option ondblclick="removePetFromClientFunc(\'' + id + '\')" value="' + id + '">' + title + '</option>';
+        var div = document.getElementById('divPetsIdList');
+        div.innerHTML += '<input type="hidden" class="petHidden" name="clientPets" value="' + id + '" />';
+    }
+
+    function addTagToClientFunc(id, title) {
+        var select = document.getElementById('clientsTags');
+
+        for (var i = 0; i < select.length; i++) {
+            if (select[i].value === id) {
+                return;
+            }
+        }
+
+        select.innerHTML += '<option ondblclick="removeTagFromClientFunc(\'' + id + '\')" value="' + id + '">' + title + '</option>';
+        var div = document.getElementById('divTagIdList');
+        div.innerHTML += '<input type="hidden" class="tagHidden" name="clientTags" value="' + id + '" />';
+    }
+
+    function removeTagFromClientFunc(id) {
+
+        var select = document.getElementById('clientsTags');
+
+        for (var i = 0; i < select.length; i++) {
+            if (select[i].value === id) {
+                select.remove(i);
+                break;
+            }
+        }
+
+        var tags = document.getElementsByClassName('tagHidden');
+        for (var i = 0; i < tags.length; i++) {
+            if (tags[i].value === id) {
+                tags[i].remove();
+                break;
+            }
+        }
+    }
+
+    function removePetFromClientFunc(id) {
+
+        var select = document.getElementById('clientsPets');
+
+        for (var i = 0; i < select.length; i++) {
+            if (select[i].value === id) {
+                select.remove(i);
+                break;
+            }
+        }
+
+        var tags = document.getElementsByClassName('petHidden');
+        for (var i = 0; i < tags.length; i++) {
+            if (tags[i].value === id) {
+                tags[i].remove();
+                break;
+            }
+        }
+    }
+
+</script>

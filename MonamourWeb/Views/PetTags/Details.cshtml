@@ -1,0 +1,144 @@
+﻿@model MonamourWeb.ViewModels.PetTagDetailsViewModel
+@{
+    ViewData["Title"] = "Тег питомца " + @Model.PetTag.Title;
+}
+
+<input asp-for="@Model.PetTag.Id" hidden />
+<div class="border p-3">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group row">
+        <h4 class="text-black-50 pl-3">Тег питомца @Model.PetTag.Title</h4>
+    </div>
+
+    <br />
+
+    <table class="table mx-auto table-borderless text-md-center" style="width: 50%">
+        <tr>
+            <td class="w-25">
+                <label asp-for="@Model.PetTag.Title" class="font-weight-bold"></label>
+            </td>
+            <td>
+                <text>@Model.PetTag.Title</text>
+            </td>
+        </tr>
+        <tr>
+            <td class="w-25">
+                <label asp-for="@Model.PetTag.ShortTitle" class="font-weight-bold"></label>
+            </td>
+            <td>
+                <text>@Model.PetTag.ShortTitle</text>
+            </td>
+        </tr>
+        <tr>
+            <td class="w-25">
+                <label asp-for="@Model.PetTag.Color" class="font-weight-bold"></label>
+            </td>
+            <td>
+                <div margin="auto" style="margin: 0 auto; width: 30px; height: 30px; background-color: @Model.PetTag.Color"></div>
+            </td>
+        </tr>
+    </table>
+
+    <br />
+
+    <div class="form-group row">
+        <div class="col-8 offset-2 row">
+            @if (Context.User.IsInRole("Admin"))
+            {
+                <div class="col">
+                    <a asp-controller="PetTags" asp-action="Update" asp-route-Id="@Model.PetTag.Id" class="btn btn-info w-75">Редактировать</a>
+                </div>
+            }
+            <div class="col">
+                <a class="btn btn-info w-75" asp-controller="PetTags" asp-action="All">Назад</a>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.PaginatedList.Any())
+    {
+        <table class="table table-bordered table-striped text-center" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Name)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Clients)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Breed)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Bday)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.ShortInfo)
+                    </th>
+                    <th>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.PaginatedList)
+                {
+                <tr>
+                    <td width="25%">
+                        <a asp-controller="Pets" asp-action="Details" asp-route-Id="@item.Id">@item.Name</a><br />
+                    </td>
+                    <td width="20%">
+                        @foreach (var pet in item.Clients)
+                        {
+                            <a asp-controller="Pets" asp-action="Details" asp-route-Id="@pet.Id">@pet.Name</a><br />
+                        }
+                    </td>
+                    <td width="10%">@item.Breed.Title</td>
+                    <td width="10%">@item.Bday</td>
+                    <td width="30%">@item.ShortInfo</td>
+                    <td width="5%">
+                        <div class="w-100 btn-group" role="group">
+                            <a asp-controller="Pets" asp-action="Update" asp-route-Id="@item.Id" class="btn btn-primary mx-1">
+                                <span class="fa fa-pen"></span>
+                            </a>
+                            @if (Context.User.IsInRole("Admin"))
+                            {
+                                <a asp-controller="Pets" asp-action="Delete" asp-route-Id="@item.Id" class="btn btn-danger mx-1">
+                                    <span class="fa fa-trash"></span>
+                                </a>
+                            }
+                        </div>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="form-group row">
+            <h6 class="text-black-50 pl-3">Нет клиентов с тегом  @Model.PetTag.Title</h6>
+        </div>
+    }
+
+    @{
+        var prevDisabled = !Model.PaginatedList.HasPreviousPage ? "disabled" : "";
+        var nextDisabled = !Model.PaginatedList.HasNextPage ? "disabled" : "";
+        var hidden = Model.PaginatedList.Count == 0 ? "d-none" : "";
+    }
+
+    <a asp-action="Details"
+       asp-route-id="@Model.PetTag.Id"
+       asp-route-page="@(Model.PaginatedList.PageIndex - 1)"
+       asp-route-pageSize="@Model.PageSettings.PageSize"
+       class="btn btn-default @prevDisabled @hidden">
+        <- Назад
+    </a>
+    <a asp-action="Details"
+       asp-route-id="@Model.PetTag.Id"
+       asp-route-page="@(Model.PaginatedList.PageIndex + 1)"
+       asp-route-pageSize="@Model.PageSettings.PageSize"
+       class="btn btn-default @nextDisabled @hidden">
+        Вперёд ->
+    </a>
+</div>
+

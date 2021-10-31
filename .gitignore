@@ -1,0 +1,5 @@
+﻿_ReSharper.Caches
+.vs
+MonamourWeb/bin
+MonamourWeb/Migrations
+MonamourWeb/obj

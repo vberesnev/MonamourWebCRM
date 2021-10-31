@@ -1,0 +1,115 @@
+﻿@model MonamourWeb.Models.Client
+@{
+    ViewData["Title"] = "Просмотр клиента";
+}
+<form method="post" asp-controller="Clients" asp-action="Update">
+    <input asp-for="Id" hidden />
+    <div class="border p-3">
+        <div class="form-group row">
+            <h2 class="text-black-50 pl-3">Просмотр клиента</h2>
+        </div>
+
+        <table class="table table-borderless text-center" style="width: 100%">
+            <tr>
+                <td class="w-25">
+                    <label asp-for="@Model.Name"></label>
+                </td>
+                <td>
+                    <text class="form-control">@Model.Name</text>
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="@Model.Phone"></label>
+                </td>
+                <td>
+                    @if (Context.User.IsInRole("Admin"))
+                    {
+                        <text>@Model.Phone</text>
+                    }
+                    else
+                    {
+                        <text>@Model.SecretPhone</text>
+                    }
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="@Model.Pets"></label>
+                </td>
+                <td>
+                    <select multiple id="clientsTags" class="form-control">
+                        @foreach (var item in Model.Pets)
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="@Model.Email"></label>
+                </td>
+                <td>
+                    <text class="form-control">@Model.Email</text>
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="@Model.Instagram"></label>
+                </td>
+                <td>
+                    <text class="form-control">@Model.Instagram</text>
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="@Model.Social"></label>
+                </td>
+                <td>
+                    <text class="form-control">@Model.Social</text>
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="@Model.Info"></label>
+                </td>
+                <td>
+                    <textarea style="height: 50px" asp-for="@Model.Info" class="form-control"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="@Model.Bonus"></label>
+                </td>
+                <td>
+                    <text class="form-control">@Model.Bonus</text>
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="@Model.Tags"></label>
+                </td>
+                <td>
+                    <select multiple id="clientsTags" class="form-control">
+                        @foreach (var item in Model.Tags)
+                        {
+                            <option value="@item.Id">@item.Title</option>
+                        }
+                    </select>
+                </td>
+            </tr>
+        </table>
+
+        <div class="form-group row">
+            <div class="col-8 offset-2 row">
+                <div class="col">
+                    <input type="submit" class="btn btn-info w-75" value="Редактировать" />
+                </div>
+                <div class="col">
+                    <a class="btn btn-info w-75" asp-controller="Clients" asp-action="All">Назад</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
