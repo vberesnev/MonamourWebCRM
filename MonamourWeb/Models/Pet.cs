@@ -17,6 +17,7 @@ namespace MonamourWeb.Models
         public string Bday { get; set; }
 
         [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Порода должна быть выбрана")]
         public int BreedId { get; set; }
 
         [DisplayName("Порода")]

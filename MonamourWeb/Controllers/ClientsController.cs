@@ -121,14 +121,16 @@ namespace MonamourWeb.Controllers
         [HttpPost]
         public JsonResult SearchPet([FromBody] string search)
         {
+            IQueryable<Pet> pets;
             if (string.IsNullOrEmpty(search))
-                return Json(null);
-
-            search = search.ToLower();
-            var pets = _context.Pets.Include(x => x.Breed)
-                                                .Where(x => x.Name.ToLower().Contains(search) || x.Breed.Title.ToLower().Contains(search))
-                                                .Where(x => x.Alive);
-            
+                pets = _context.Pets.Take(10);
+            else
+            {
+                search = search.ToLower();
+                pets = _context.Pets.Include(x => x.Breed)
+                    .Where(x => x.Name.ToLower().Contains(search) || x.Breed.Title.ToLower().Contains(search))
+                    .Where(x => x.Alive);
+            }
             return Json(pets); 
         }
         

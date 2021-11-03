@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -118,13 +117,17 @@ namespace MonamourWeb.Controllers
         [HttpPost]
         public JsonResult SearchClient([FromBody] string search)
         {
+            IQueryable<Client> clients;
             if (string.IsNullOrEmpty(search))
-                return Json(null);
+                clients = _context.Clients.Take(10);
+            else
+            {
+                search = search.ToLower(); 
+                clients = _context.Clients
+                    .Where(x => x.Name.ToLower().Contains(search) || x.Phone.Contains(search))
+                    .Take(50);
+            }
 
-            search = search.ToLower();
-            var clients = _context.Clients
-                .Where(x => x.Name.ToLower().Contains(search) || x.Phone.Contains(search));
-            
             return Json(clients); 
         }
 

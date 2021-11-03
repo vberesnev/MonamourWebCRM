@@ -7,7 +7,7 @@
     <div class="border p-3">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="form-group row">
-            <h2 class="text-black-50 pl-3">Добавить питомца</h2>
+            <h4 class="text-black-50 pl-3">Обновить питомца</h4>
         </div>
 
         <table class="table table-borderless text-center" style="width: 100%">
@@ -117,7 +117,10 @@
                     <label asp-for="@Model.Pet.Alive"></label>
                 </td>
                 <td colspan="1">
-                    <checkbox asp-for="@Model.Pet.Alive" class="form-control"></checkbox>
+                    <div class="custom-control custom-checkbox text-left">
+                        <input type="checkbox" class="custom-control-input" id="customCheck1" asp-for="@Model.Pet.Alive">
+                        <label class="custom-control-label" for="customCheck1"></label>
+                    </div>
                 </td>
             </tr>
         </table>
@@ -125,7 +128,7 @@
         <div class="form-group row">
             <div class="col-8 offset-2 row">
                 <div class="col">
-                    <input type="submit" class="btn btn-info w-75" value="Обнвоить" />
+                    <input type="submit" class="btn btn-info w-75" value="Сохранить" />
                 </div>
                 <div class="col">
                     <a class="btn btn-danger w-75" asp-controller="Pets" asp-action="All">Назад</a>
