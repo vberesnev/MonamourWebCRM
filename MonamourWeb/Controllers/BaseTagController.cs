@@ -15,7 +15,12 @@ namespace MonamourWeb.Controllers
                 "Green",
                 "Blue",
                 "Orange",
-                "Brown"
+                "Brown",
+                "Pink",
+                "Yellow",
+                "Coral",
+                "Lime",
+                "Cyan"
             };
         }
     }
