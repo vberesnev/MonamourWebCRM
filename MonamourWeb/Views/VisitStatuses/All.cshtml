@@ -1,0 +1,54 @@
+﻿@using System.Collections
+@model IEnumerable<MonamourWeb.Models.VisitStatus>
+@{
+    ViewData["Title"] = "Статусы посещений";
+}
+
+<div class="container p-3">
+    <div class="row pt-4">
+        <div class="col-6">
+            <h4 class="text-black-50 pl-3">Статусы посещений</h4>
+        </div>
+        <div class="col-6 text-right">
+            <a class="btn btn-success" asp-controller="VisitStatuses" asp-action="Create">Добавить</a>
+        </div>
+    </div>
+    <br />
+
+    @if (Model.Any())
+    {
+        <table class="table table-bordered table-striped text-center" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Status)
+                    </th>
+                    @if (Context.User.IsInRole("Admin"))
+                    {
+                        <th>
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Status</td>
+                    <td width="5%">
+                        <div class="w-100 btn-group" role="group">
+                            <a asp-controller="VisitStatuses" asp-action="Update" asp-route-Id="@item.Id" class="btn btn-primary mx-1">
+                                <span class="fa fa-pen"></span>
+                            </a>
+                            <a asp-controller="VisitStatuses" asp-action="Delete" asp-route-Id="@item.Id" class="btn btn-danger mx-1">
+                                <span class="fa fa-trash"></span>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+</div>
+

@@ -94,8 +94,11 @@
                     <th>
                         <a>@Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Info)</a>
                     </th>
-                    <th>
-                    </th>
+                    @if (Context.User.IsInRole("Admin"))
+                    {
+                        <th>
+                        </th>
+                    }
                 </tr>
             </thead>
             <tbody>
@@ -106,16 +109,19 @@
                         <td width="20%">@item.Animal.Title</td>
                         <td width="10%">@item.Cost</td>
                         <td width="35%">@item.Info</td>
-                        <td width="5%">
-                            <div class="w-100 btn-group" role="group">
-                                <a asp-controller="Procedures" asp-action="Update" asp-route-Id="@item.Id" class="btn btn-primary mx-1">
-                                    <span class="fa fa-pen"></span>
-                                </a>
-                                <a asp-controller="Procedures" asp-action="Delete" asp-route-Id="@item.Id" class="btn btn-danger mx-1">
-                                    <span class="fa fa-trash"></span>
-                                </a>
-                            </div>
-                        </td>
+                        @if (Context.User.IsInRole("Admin"))
+                        {
+                            <td width="5%">
+                                <div class="w-100 btn-group" role="group">
+                                    <a asp-controller="Procedures" asp-action="Update" asp-route-Id="@item.Id" class="btn btn-primary mx-1">
+                                        <span class="fa fa-pen"></span>
+                                    </a>
+                                    <a asp-controller="Procedures" asp-action="Delete" asp-route-Id="@item.Id" class="btn btn-danger mx-1">
+                                        <span class="fa fa-trash"></span>
+                                    </a>
+                                </div>
+                            </td>
+                        }
                     </tr>
                 }
             </tbody>

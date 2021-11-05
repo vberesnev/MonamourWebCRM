@@ -19,5 +19,10 @@ namespace MonamourWeb.Models
         public DbSet<Pet> Pets { get; set; }
         public DbSet<Client> Clients { get; set; }
         public DbSet<Log> Logs { get; set; }
+        public DbSet<PaymentType> PaymentTypes { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<VisitStatus> VisitStatuses { get; set; }
+        public DbSet<VisitProcedure> VisitProcedures { get; set; }
+        public DbSet<Visit> Visits { get; set; }
     }
 }

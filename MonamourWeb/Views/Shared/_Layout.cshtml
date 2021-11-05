@@ -47,7 +47,16 @@
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="ClientTags" asp-action="All">Теги клиентов</a>
                                 </li>
-                            </ul>
+                                @if (Context.User.IsInRole("Admin"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="PaymentTypes" asp-action="All">Типы оплаты</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="VisitStatuses" asp-action="All">Статусы посещений</a>
+                                    </li>
+                                }
+                                </ul>
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link text-dark dropdown-toggle" data-toggle="dropdown" href="#">Сервис</a>

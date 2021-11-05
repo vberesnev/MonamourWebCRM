@@ -1,0 +1,42 @@
+﻿@model MonamourWeb.Models.VisitStatus
+@{
+    ViewData["Title"] = "Редактировать статус посещения";
+}
+
+<form method="post" asp-controller="VisitStatuses" asp-action="UpdatePost">
+    <input asp-for="Id" hidden />
+    <div class="border p-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group row">
+            <h4 class="text-black-50 pl-3">Редактировать статус посещения</h4>
+        </div>
+
+        <br />
+
+        <table class="table mx-auto table-borderless text-md-center" style="width: 100%">
+            <tr>
+                <td class="w-25">
+                    <label asp-for="Status" class="font-weight-bold"></label>
+                </td>
+                <td>
+                    <input asp-for="Status" value="@Model.Status" class="form-control" />
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </td>
+            </tr>
+        </table>
+
+        <br />
+
+        <div class="form-group row">
+            <div class="col-8 offset-2 row">
+                <div class="col">
+                    <input type="submit" class="btn btn-info w-75" value="Сохранить" />
+                </div>
+                <div class="col">
+                    <a class="btn btn-danger w-75" asp-controller="VisitStatuses" asp-action="All">Назад</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
