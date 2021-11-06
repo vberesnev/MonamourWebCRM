@@ -6,19 +6,18 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using MonamourWeb.Models;
 using MonamourWeb.Services.Filters;
+using MonamourWeb.Services.Logs;
 using MonamourWeb.Services.Pagination;
 using MonamourWeb.ViewModels;
 
 namespace MonamourWeb.Controllers
 {
     [Authorize]
-    public class ClientsController : Controller
+    public class ClientsController : BaseController
     {
-        private readonly MonamourDataBaseContext _context;
-
-        public ClientsController(MonamourDataBaseContext context)
+        public ClientsController(MonamourDataBaseContext context, ILogService logService)
+            : base(context, logService)
         {
-            _context = context;
         }
 
         public async Task<IActionResult> All(string sort, string search, int? tagId, int? page, int? pageSize)
@@ -28,10 +27,10 @@ namespace MonamourWeb.Controllers
             viewModel.PageSettings.Search = search;
             viewModel.PageSettings.PageSize = pageSize ?? 25;
             viewModel.PageSettings.PageSizes = PageSize.GetSelectListItems(pageSize);
-            viewModel.Tags = _context.ClientTags;
+            viewModel.Tags = Context.ClientTags;
             viewModel.TagId = tagId;
 
-            var clients = _context.Clients.Include(x => x.Pets).Include(x => x.Tags).AsQueryable();
+            var clients = Context.Clients.Include(x => x.Pets).Include(x => x.Tags).AsQueryable();
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -67,8 +66,9 @@ namespace MonamourWeb.Controllers
             if (id == null || id == 0)
                 return NotFound();
 
-            var client = _context.Clients
+            var client = Context.Clients
                 .Include(x => x.Pets)
+                .ThenInclude(x => x.Breed)
                 .Include(x => x.Tags)
                 .FirstOrDefault(x => x.Id == id);
 
@@ -82,40 +82,53 @@ namespace MonamourWeb.Controllers
         public IActionResult Update(int? id)
         {
             var viewModel = new ClientViewModel();
-            viewModel.Client = _context.Clients.Where(x => x.Id == id)
-                                                .Include(x => x.Tags)
-                                                .Include(x => x.Pets)
-                                                .ThenInclude(x => x.Breed)
-                                                .SingleOrDefault();
-            viewModel.AllTags = _context.ClientTags.ToList();
+            viewModel.Client = Context.Clients
+                .Include(x => x.Tags)
+                .Include(x => x.Pets)
+                .ThenInclude(x => x.Breed)
+                .FirstOrDefault(x => x.Id == id);
+
+            if (viewModel.Client is null)
+                return NotFound();
+
+            viewModel.AllTags = Context.ClientTags.ToList();
             return View(viewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdatePost(ClientViewModel clientViewModel, List<int> clientPets, List<int> clientTags)
+        public async Task<IActionResult> Update(ClientViewModel clientViewModel, List<int> clientPets, List<int> clientTags)
         {
             if (ModelState.IsValid)
             {
-                var client = _context.Clients.Where(x => x.Id == clientViewModel.Client.Id)
+                var client = Context.Clients
                     .Include(x => x.Tags)
                     .Include(x => x.Pets)
-                    .First();
+                    .ThenInclude(x => x.Breed)
+                    .FirstOrDefault(x => x.Id == clientViewModel.Client.Id);
 
-                var pets = _context.Pets.Where(x => clientPets.Contains(x.Id));
+                if (client is null)
+                    return NotFound();
+
+                var oldClient = client.Clone() as Client;
+
+                var pets = Context.Pets
+                    .Include(x => x.Breed)
+                    .Where(x => clientPets.Contains(x.Id));
                 foreach (var pet in pets)
                     clientViewModel.Client.Pets.Add(pet); 
 
-                var tags = _context.ClientTags.Where(x => clientTags.Contains(x.Id));
+                var tags = Context.ClientTags.Where(x => clientTags.Contains(x.Id));
                 foreach (var tag in tags)
-                    clientViewModel.Client.Tags.Add(tag); 
+                    clientViewModel.Client.Tags.Add(tag);
 
                 client.Update(clientViewModel.Client);
 
-                await _context.SaveChangesAsync();
+                await Context.SaveChangesAsync();
+                await LogService.AddUpdatedLogAsync<Client>(oldClient, client, UserId);
                 return RedirectToAction("All");
             }
-            return RedirectToAction("Update", clientViewModel.Client.Id);
+            return Update(clientViewModel.Client.Id);
         }
 
         [HttpPost]
@@ -123,11 +136,11 @@ namespace MonamourWeb.Controllers
         {
             IQueryable<Pet> pets;
             if (string.IsNullOrEmpty(search))
-                pets = _context.Pets.Take(10);
+                pets = Context.Pets.Take(10);
             else
             {
                 search = search.ToLower();
-                pets = _context.Pets.Include(x => x.Breed)
+                pets = Context.Pets.Include(x => x.Breed)
                     .Where(x => x.Name.ToLower().Contains(search) || x.Breed.Title.ToLower().Contains(search))
                     .Where(x => x.Alive);
             }
@@ -141,8 +154,9 @@ namespace MonamourWeb.Controllers
             if (id == null || id == 0)
                 return NotFound();
 
-            var client = _context.Clients
+            var client = Context.Clients
                 .Include(x => x.Pets)
+                .ThenInclude(x => x.Breed)
                 .Include(x => x.Tags)
                 .FirstOrDefault(x => x.Id == id);
 
@@ -155,13 +169,18 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeletePost(int? id)
+        public async Task<IActionResult> DeletePost(int? id)
         {
-            var client = _context.Clients.Find(id);
+            var client = Context.Clients
+                .Include(x => x.Pets)
+                .ThenInclude(x => x.Breed)
+                .Include(x => x.Tags)
+                .FirstOrDefault(x => x.Id == id);
             if (client == null)
                 return NotFound();
-            _context.Clients.Remove(client);
-            _context.SaveChanges();
+            Context.Clients.Remove(client);
+            await Context.SaveChangesAsync();
+            await LogService.AddDeletedLogAsync<Client>(client, UserId);
             return RedirectToAction("All");
         }
 
@@ -169,7 +188,7 @@ namespace MonamourWeb.Controllers
         public IActionResult Create()
         {
             var viewModel = new ClientViewModel();
-            viewModel.AllTags = _context.ClientTags.ToList();
+            viewModel.AllTags = Context.ClientTags.ToList();
             return View(viewModel);
         }
 
@@ -179,16 +198,19 @@ namespace MonamourWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                var pets = _context.Pets.Where(x => clientPets.Contains(x.Id));
+                var pets = Context.Pets
+                    .Include(x => x.Breed)
+                    .Where(x => clientPets.Contains(x.Id));
                 foreach (var pet in pets)
                     clientViewModel.Client.Pets.Add(pet); 
 
-                var tags = _context.ClientTags.Where(x => clientTags.Contains(x.Id));
+                var tags = Context.ClientTags.Where(x => clientTags.Contains(x.Id));
                 foreach (var tag in tags)
                     clientViewModel.Client.Tags.Add(tag);
                 
-                _context.Clients.Add(clientViewModel.Client);
-                await _context.SaveChangesAsync();
+                Context.Clients.Add(clientViewModel.Client);
+                await Context.SaveChangesAsync();
+                await LogService.AddCreationLogAsync<Client>(clientViewModel.Client, UserId);
                 return RedirectToAction("All");
             }
             return View(clientViewModel);

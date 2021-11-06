@@ -5,19 +5,18 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using MonamourWeb.Models;
 using MonamourWeb.Services.Filters;
+using MonamourWeb.Services.Logs;
 using MonamourWeb.Services.Pagination;
 using MonamourWeb.ViewModels;
 
 namespace MonamourWeb.Controllers
 {
     [Authorize]
-    public class BreedsController : Controller
+    public class BreedsController : BaseController
     {
-        private readonly MonamourDataBaseContext _context;
-
-        public BreedsController(MonamourDataBaseContext context)
+        public BreedsController(MonamourDataBaseContext context, ILogService logService)
+            : base(context, logService)
         {
-            _context = context;
         }
 
         public async Task<IActionResult> All(string sort, string search, int? page, int? pageSize)
@@ -28,7 +27,7 @@ namespace MonamourWeb.Controllers
             viewModel.PageSettings.PageSize = pageSize ?? 25;
             viewModel.PageSettings.PageSizes = PageSize.GetSelectListItems(pageSize);
 
-            var breeds = _context.Breeds.Include(x => x.Animal).AsQueryable();
+            var breeds = Context.Breeds.Include(x => x.Animal).AsQueryable();
             
             if (!string.IsNullOrEmpty(search))
             {
@@ -59,7 +58,7 @@ namespace MonamourWeb.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            var animals = _context.Animals.ToList();
+            var animals = Context.Animals.ToList();
             var viewModel = new BreedViewModel() 
             {
                 Animals = animals
@@ -69,15 +68,17 @@ namespace MonamourWeb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(BreedViewModel breedViewModel)
+        public async Task<IActionResult> Create(BreedViewModel breedViewModel)
         {
             if (ModelState.IsValid)
             {
-                _context.Breeds.Add(breedViewModel.Breed);
-                _context.SaveChanges();
+                breedViewModel.Breed.Animal = await Context.Animals.FindAsync(breedViewModel.Breed.AnimalId);
+                Context.Breeds.Add(breedViewModel.Breed);
+                await Context.SaveChangesAsync();
+                await LogService.AddCreationLogAsync<Breed>(breedViewModel.Breed, UserId);
                 return RedirectToAction("All");
             }
-            breedViewModel.Animals = _context.Animals.ToList();
+            breedViewModel.Animals = Context.Animals.ToList();
             return View(breedViewModel);
         }
 
@@ -88,12 +89,14 @@ namespace MonamourWeb.Controllers
             if (id == null || id == 0)
                 return NotFound();
 
-            var breed = _context.Breeds.Include(x => x.Animal).FirstOrDefault(x => x.Id == id);
+            var breed = Context.Breeds
+                .Include(x => x.Animal)
+                .FirstOrDefault(x => x.Id == id);
             
             if (breed == null)
                 return NotFound();
 
-            var animals = _context.Animals.ToList();
+            var animals = Context.Animals.ToList();
             var breedViewModel = new BreedViewModel()
             {
                 Breed = breed,
@@ -105,17 +108,27 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdatePost(BreedViewModel breedViewModel)
+        public async Task<IActionResult> Update(BreedViewModel breedViewModel)
         {
-            var breed = _context.Breeds.Find(breedViewModel.Breed.Id);
-            if (breed == null)
-                return NotFound();
+            if (ModelState.IsValid)
+            {
+                var breed = Context.Breeds
+                    .Include(x => x.Animal)
+                    .FirstOrDefault(x => x.Id == breedViewModel.Breed.Id);
+                if (breed == null)
+                    return NotFound();
+                var oldBreed = breed.Clone() as Breed;
 
-            breed.Title = breedViewModel.Breed.Title;
-            breed.AnimalId = breedViewModel.Breed.AnimalId;
+                breed.Title = breedViewModel.Breed.Title;
+                breed.AnimalId = breedViewModel.Breed.AnimalId;
+                breed.Animal = await Context.Animals.FindAsync(breed.AnimalId);
 
-            _context.SaveChanges();
-            return RedirectToAction("All");
+                await Context.SaveChangesAsync();
+                await LogService.AddUpdatedLogAsync<Breed>(oldBreed, breed, UserId);
+                return RedirectToAction("All");
+            }
+
+            return Update(breedViewModel.Breed.Id);
         }
 
         [UserRoleFilter]
@@ -125,7 +138,9 @@ namespace MonamourWeb.Controllers
             if (id == null || id == 0)
                 return NotFound();
 
-            var user = _context.Breeds.Include(x => x.Animal).FirstOrDefault(x => x.Id == id);
+            var user = Context.Breeds
+                .Include(x => x.Animal)
+                .FirstOrDefault(x => x.Id == id);
 
             if (user == null)
                 return NotFound();
@@ -136,13 +151,16 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeletePost(int? id)
+        public async Task<IActionResult> DeletePost(int? id)
         {
-            var breed = _context.Breeds.Find(id);
+            var breed = Context.Breeds
+                .Include(x => x.Animal)
+                .FirstOrDefault(x => x.Id == id);
             if (breed == null)
                 return NotFound();
-            _context.Breeds.Remove(breed);
-            _context.SaveChanges();
+            Context.Breeds.Remove(breed);
+            await Context.SaveChangesAsync();
+            await LogService.AddDeletedLogAsync<Breed>(breed, UserId);
             return RedirectToAction("All");
         }
     }

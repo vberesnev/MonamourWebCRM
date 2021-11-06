@@ -28,7 +28,7 @@
                     <select asp-for="@Model.Pet.BreedId" class="form-control mt-1" id="breedSelector">
                         <option value="" disabled selected>Выберите породу</option>
                     </select>
-
+                    <span asp-validation-for="@Model.Pet.BreedId" class="text-danger"></span>
                 </td>
             </tr>
             <tr>

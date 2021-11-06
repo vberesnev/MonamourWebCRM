@@ -47,6 +47,15 @@
             </tr>
             <tr>
                 <td>
+                    <label asp-for="Procedure.ApproximateTime"></label>
+                </td>
+                <td>
+                    <input asp-for="Procedure.ApproximateTime" class="form-control" />
+                    <span asp-validation-for="Procedure.ApproximateTime" class="text-danger"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
                     <label asp-for="Procedure.Info"></label>
                 </td>
                 <td>

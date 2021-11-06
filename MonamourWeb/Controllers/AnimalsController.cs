@@ -1,23 +1,24 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MonamourWeb.Models;
 using MonamourWeb.Services.Filters;
+using MonamourWeb.Services.Logs;
 
 namespace MonamourWeb.Controllers
 {
     [Authorize]
-    public class AnimalsController : Controller
+    public class AnimalsController : BaseController
     {
-        private readonly MonamourDataBaseContext _context;
-
-        public AnimalsController(MonamourDataBaseContext context)
+        public AnimalsController(MonamourDataBaseContext context, ILogService logService)
+            : base(context, logService)
         {
-            _context = context;
+            
         }
 
         public IActionResult All()
         {
-            var users = _context.Animals;
+            var users = Context.Animals;
             return View(users);
         }
 
@@ -31,12 +32,13 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Animal animal)
+        public async Task<IActionResult> Create(Animal animal)
         {
             if (ModelState.IsValid)
             {
-                _context.Animals.Add(animal);
-                _context.SaveChanges();
+                Context.Animals.Add(animal);
+                await Context.SaveChangesAsync();
+                await LogService.AddCreationLogAsync<Animal>(animal, UserId);
                 return RedirectToAction("All");
             }
             return View();
@@ -49,7 +51,7 @@ namespace MonamourWeb.Controllers
             if (id == null || id == 0)
                 return NotFound();
 
-            var animal = _context.Animals.Find(id);
+            var animal = Context.Animals.Find(id);
             
             if (animal == null)
                 return NotFound();
@@ -60,16 +62,22 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdatePost(Animal animal)
+        public async Task<IActionResult> Update(Animal animal)
         {
-            var editedAnimal = _context.Animals.Find(animal.Id);
-            if (editedAnimal == null)
-                return NotFound();
+            if (ModelState.IsValid)
+            {
+                var editedAnimal = await Context.Animals.FindAsync(animal.Id);
+                if (editedAnimal == null)
+                    return NotFound();
 
-            editedAnimal.Title = animal.Title;
+                var oldAnimal = editedAnimal.Clone() as Animal;
+                editedAnimal.Title = animal.Title;
 
-            _context.SaveChanges();
-            return RedirectToAction("All");
+                await Context.SaveChangesAsync();
+                await LogService.AddUpdatedLogAsync<Animal>(oldAnimal, editedAnimal, UserId);
+                return RedirectToAction("All");
+            }
+            return Update(animal.Id);
         }
 
         [UserRoleFilter]
@@ -79,7 +87,7 @@ namespace MonamourWeb.Controllers
             if (id == null || id == 0)
                 return NotFound();
 
-            var animal = _context.Animals.Find(id);
+            var animal = Context.Animals.Find(id);
 
             if (animal == null)
                 return NotFound();
@@ -90,13 +98,14 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeletePost(int? id)
+        public async Task<IActionResult> DeletePost(int? id)
         {
-            var animal = _context.Animals.Find(id);
+            var animal = await Context.Animals.FindAsync(id);
             if (animal == null)
                 return NotFound();
-            _context.Animals.Remove(animal);
-            _context.SaveChanges();
+            Context.Animals.Remove(animal);
+            await Context.SaveChangesAsync();
+            await LogService.AddDeletedLogAsync(animal, UserId);
             return RedirectToAction("All");
         }
     }

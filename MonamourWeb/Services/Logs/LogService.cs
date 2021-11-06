@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using MonamourWeb.Models;
 
@@ -15,12 +13,36 @@ namespace MonamourWeb.Services.Logs
             _context = context;
         }
 
+        public async Task AddLoginLogAsync(string userName, int userId)
+        {
+            var log = new Log()
+            {
+                Date = DateTime.Now,
+                Message = "ПОЛЬЗОВАТЕЛЬ "+ userName +" ВОШЕЛ В СИСТЕМУ",
+                UserId = userId
+            };
+            _context.Logs.Add(log);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddLogoutLogAsync(string userName, int userId)
+        {
+            var log = new Log()
+            {
+                Date = DateTime.Now,
+                Message = "ПОЛЬЗОВАТЕЛЬ "+ userName +" ВЫШЕЛ ИЗ СИСТЕМЫ",
+                UserId = userId
+            };
+            _context.Logs.Add(log);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task AddCreationLogAsync<T>(T createdObject, int userId)
         {
             var log = new Log()
             {
                 Date = DateTime.Now,
-                Message = "Добавлен объект " + createdObject.ToString(),
+                Message = "ДОБАВЛЕН ОБЪЕКТ " + createdObject,
                 UserId = userId
             };
             _context.Logs.Add(log);
@@ -32,7 +54,7 @@ namespace MonamourWeb.Services.Logs
             var log = new Log()
             {
                 Date = DateTime.Now,
-                Message = "Удален объект " + deletedObject.ToString(),
+                Message = "УДАЛЕН ОБЪЕКТ " + deletedObject,
                 UserId = userId
             };
             _context.Logs.Add(log);
@@ -41,17 +63,39 @@ namespace MonamourWeb.Services.Logs
 
         public async Task AddUpdatedLogAsync<T>(T oldObject, T newObject, int userId)
         {
-            throw new NotImplementedException();
-
             var log = new Log()
             {
                 Date = DateTime.Now,
-                Message = " объект " + oldObject.ToString(),
+                Message = "ОБНОВЛЕН ОБЪЕКТ " + oldObject + " НА НОВЫЙ ОБЪЕКТ " + newObject,
+                UserId = userId
+            };
+                
+            _context.Logs.Add(log);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddBlockUserLogAsync(string userName, int userId)
+        {
+            var log = new Log()
+            {
+                Date = DateTime.Now,
+                Message = "ПОЛЬЗОВАТЕЛЬ "+ userName +" ЗАБЛОКИРОВАН",
                 UserId = userId
             };
             _context.Logs.Add(log);
             await _context.SaveChangesAsync();
         }
 
+        public async Task AddUnblockUserLogAsync(string userName, int userId)
+        {
+            var log = new Log()
+            {
+                Date = DateTime.Now,
+                Message = "ПОЛЬЗОВАТЕЛЬ "+ userName +" РАЗБЛОКИРОВАН",
+                UserId = userId
+            };
+            _context.Logs.Add(log);
+            await _context.SaveChangesAsync();
+        }
     }
 }

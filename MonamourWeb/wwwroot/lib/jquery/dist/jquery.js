@@ -836,7 +836,7 @@ function Sizzle( selector, context, results, seed ) {
 				( nodeType !== 1 || context.nodeName.toLowerCase() !== "object" ) ) {
 
 				newSelector = selector;
-				newContext = context;
+				new
 
 				// qSA considers elements outside a scoping root when evaluating child or
 				// descendant combinators, which is not what we want.
@@ -1921,7 +1921,7 @@ Expr = Sizzle.selectors = {
 					return !!elem.parentNode;
 				} :
 
-				function( elem, _context, xml ) {
+				function( elem, Context, xml ) {
 					var cache, uniqueCache, outerCache, node, nodeIndex, start,
 						dir = simple !== forward ? "nextSibling" : "previousSibling",
 						parent = elem.parentNode,
@@ -2095,7 +2095,7 @@ Expr = Sizzle.selectors = {
 				matcher = compile( selector.replace( rtrim, "$1" ) );
 
 			return matcher[ expando ] ?
-				markFunction( function( seed, matches, _context, xml ) {
+				markFunction( function( seed, matches, Context, xml ) {
 					var elem,
 						unmatched = matcher( seed, null, xml, [] ),
 						i = seed.length;
@@ -2107,7 +2107,7 @@ Expr = Sizzle.selectors = {
 						}
 					}
 				} ) :
-				function( elem, _context, xml ) {
+				function( elem, Context, xml ) {
 					input[ 0 ] = elem;
 					matcher( input, null, xml, results );
 

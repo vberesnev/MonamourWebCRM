@@ -10,5 +10,22 @@ namespace MonamourWeb.Models
         {
             Clients = new List<Client>();
         }
+
+        public override string ToString()
+        {
+            return $"Клиентский тег: [Id]: {Id}; [Тег]: {Title}; [Короткий тег]: {ShortTitle}; [Цвет]: {Color};";
+        }
+
+
+        public override object Clone()
+        {
+            return new ClientTag()
+            {
+                Id = this.Id,
+                Color = this.Color,
+                Title = this.Title,
+                ShortTitle = this.ShortTitle
+            };
+        }
     }
 }

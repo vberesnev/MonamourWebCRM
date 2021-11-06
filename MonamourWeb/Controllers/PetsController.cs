@@ -6,19 +6,18 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using MonamourWeb.Models;
 using MonamourWeb.Services.Filters;
+using MonamourWeb.Services.Logs;
 using MonamourWeb.Services.Pagination;
 using MonamourWeb.ViewModels;
 
 namespace MonamourWeb.Controllers
 {
     [Authorize]
-    public class PetsController : Controller
+    public class PetsController : BaseController
     {
-        private readonly MonamourDataBaseContext _context;
-
-        public PetsController(MonamourDataBaseContext context)
+        public PetsController(MonamourDataBaseContext context, ILogService logService)
+            : base(context, logService)
         {
-            _context = context;
         }
 
         public async Task<IActionResult> All(string sort, string search, int? tagId, int? page, int? pageSize)
@@ -28,10 +27,10 @@ namespace MonamourWeb.Controllers
             viewModel.PageSettings.Search = search;
             viewModel.PageSettings.PageSize = pageSize ?? 25;
             viewModel.PageSettings.PageSizes = PageSize.GetSelectListItems(pageSize);
-            viewModel.Tags = _context.PetTags;
+            viewModel.Tags = Context.PetTags;
             viewModel.TagId = tagId;
 
-            var pets = _context.Pets.Include(x => x.Clients)
+            var pets = Context.Pets.Include(x => x.Clients)
                                                 .Include(x => x.Tags)
                                                 .Include(x => x.Breed)
                                                 .AsQueryable();
@@ -69,7 +68,7 @@ namespace MonamourWeb.Controllers
         public IActionResult Create()
         {
             var viewModel = new PetViewModel();
-            viewModel.AllTags = _context.PetTags.ToList();
+            viewModel.AllTags = Context.PetTags.ToList();
             return View(viewModel);
         }
 
@@ -79,18 +78,20 @@ namespace MonamourWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                var clients = _context.Clients.Where(x => clientsOfPet.Contains(x.Id));
+                var clients = Context.Clients.Where(x => clientsOfPet.Contains(x.Id));
                 foreach (var client in clients)
                     petViewModel.Pet.Clients.Add(client); 
 
-                var tags = _context.PetTags.Where(x => tagsOfPet.Contains(x.Id));
+                var tags = Context.PetTags.Where(x => tagsOfPet.Contains(x.Id));
                 foreach (var tag in tags)
                     petViewModel.Pet.Tags.Add(tag);
 
                 petViewModel.Pet.Alive = true;
+                petViewModel.Pet.Breed = await Context.Breeds.FindAsync(petViewModel.Pet.BreedId);
                 
-                _context.Pets.Add(petViewModel.Pet);
-                await _context.SaveChangesAsync();
+                Context.Pets.Add(petViewModel.Pet);
+                await Context.SaveChangesAsync();
+                await LogService.AddCreationLogAsync<Pet>(petViewModel.Pet, UserId);
                 return RedirectToAction("All");
             }
             return View(petViewModel);
@@ -102,12 +103,12 @@ namespace MonamourWeb.Controllers
             IQueryable<Breed> breeds;
             if (string.IsNullOrEmpty(search))
             {
-                breeds = _context.Breeds.Take(10);
+                breeds = Context.Breeds.Take(10);
             }
             else
             {
                 search = search.ToLower(); 
-                breeds = _context.Breeds
+                breeds = Context.Breeds
                     .Where(x => x.Title.ToLower().Contains(search))
                     .Take(10); 
             }
@@ -119,11 +120,11 @@ namespace MonamourWeb.Controllers
         {
             IQueryable<Client> clients;
             if (string.IsNullOrEmpty(search))
-                clients = _context.Clients.Take(10);
+                clients = Context.Clients.Take(10);
             else
             {
                 search = search.ToLower(); 
-                clients = _context.Clients
+                clients = Context.Clients
                     .Where(x => x.Name.ToLower().Contains(search) || x.Phone.Contains(search))
                     .Take(50);
             }
@@ -136,7 +137,7 @@ namespace MonamourWeb.Controllers
             if (id == null || id == 0)
                 return NotFound();
 
-            var pet = _context.Pets
+            var pet = Context.Pets
                 .Include(x => x.Breed)
                 .Include(x => x.Clients)
                 .Include(x => x.Tags)
@@ -155,7 +156,7 @@ namespace MonamourWeb.Controllers
             if (id == null || id == 0)
                 return NotFound();
 
-            var pet = _context.Pets
+            var pet = Context.Pets
                 .Include(x => x.Breed)
                 .Include(x => x.Clients)
                 .Include(x => x.Tags)
@@ -170,13 +171,18 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeletePost(int? id)
+        public async Task<IActionResult> DeletePost(int? id)
         {
-            var pet = _context.Pets.Find(id);
+            var pet = Context.Pets
+                .Include(x => x.Breed)
+                .Include(x => x.Clients)
+                .Include(x => x.Tags)
+                .FirstOrDefault(x => x.Id == id);
             if (pet == null)
                 return NotFound();
-            _context.Pets.Remove(pet);
-            _context.SaveChanges();
+            Context.Pets.Remove(pet);
+            await Context.SaveChangesAsync();
+            await LogService.AddDeletedLogAsync(pet, UserId);
             return RedirectToAction("All");
         }
 
@@ -184,41 +190,52 @@ namespace MonamourWeb.Controllers
         public IActionResult Update(int? id)
         {
             var viewModel = new PetViewModel();
-            viewModel.Pet = _context.Pets.Where(x => x.Id == id)
+            viewModel.Pet = Context.Pets
                 .Include(x => x.Breed)
                 .Include(x => x.Tags)
                 .Include(x => x.Clients)
-                .SingleOrDefault();
-            viewModel.AllTags = _context.PetTags.ToList();
+                .FirstOrDefault(x => x.Id == id);
+
+            if (viewModel.Pet is null)
+                return NotFound();
+
+            viewModel.AllTags = Context.PetTags.ToList();
             return View(viewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdatePost(PetViewModel petViewModel, List<int> clientsOfPet, List<int> tagsOfPet)
+        public async Task<IActionResult> Update(PetViewModel petViewModel, List<int> clientsOfPet, List<int> tagsOfPet)
         {
             if (ModelState.IsValid)
             {
-                var pet = _context.Pets.Where(x => x.Id == petViewModel.Pet.Id)
+                var pet = Context.Pets
                     .Include(x => x.Breed)
                     .Include(x => x.Tags)
                     .Include(x => x.Clients)
-                    .First();
+                    .FirstOrDefault(x => x.Id == petViewModel.Pet.Id);
 
-                var clients = _context.Clients.Where(x => clientsOfPet.Contains(x.Id));
+                if (pet is null)
+                    return NotFound();
+
+                var oldPet = pet.Clone() as Pet;
+                
+                var clients = Context.Clients.Where(x => clientsOfPet.Contains(x.Id));
                 foreach (var client in clients)
                     petViewModel.Pet.Clients.Add(client); 
 
-                var tags = _context.PetTags.Where(x => tagsOfPet.Contains(x.Id));
+                var tags = Context.PetTags.Where(x => tagsOfPet.Contains(x.Id));
                 foreach (var tag in tags)
                     petViewModel.Pet.Tags.Add(tag); 
 
                 pet.Update(petViewModel.Pet);
+                pet.Breed = await Context.Breeds.FindAsync(pet.BreedId);
 
-                await _context.SaveChangesAsync();
+                await Context.SaveChangesAsync();
+                await LogService.AddUpdatedLogAsync(oldPet, pet, UserId);
                 return RedirectToAction("All");
             }
-            return RedirectToAction("Update", petViewModel.Pet.Id);
+            return Update(petViewModel.Pet.Id);
         }
     }
 }

@@ -9,18 +9,19 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using MonamourWeb.Models;
 using MonamourWeb.Services.Encoding;
+using MonamourWeb.Services.Logs;
 using MonamourWeb.ViewModels;
 
 namespace MonamourWeb.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController : BaseController
     {
-        private readonly MonamourDataBaseContext _context;
+        
         private readonly IEncodingService _encodingService;
 
-        public AccountController(MonamourDataBaseContext context, IEncodingService encodingService)
+        public AccountController(MonamourDataBaseContext context, ILogService logService, IEncodingService encodingService) 
+            : base(context, logService)
         {
-            _context = context;
             _encodingService = encodingService;
         }
 
@@ -29,7 +30,7 @@ namespace MonamourWeb.Controllers
         {
             //await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             
-            var logins = await _context.Users.Select(x => x.Name).AsNoTracking().ToListAsync();
+            var logins = await Context.Users.Select(x => x.Name).AsNoTracking().ToListAsync();
 
             var loginViewModel = new LoginViewModel()
             {
@@ -48,13 +49,13 @@ namespace MonamourWeb.Controllers
             if (loginViewModel.User.Name == null)
             {
                 ViewData["EmptyLogin"] = "Логин должен быть выбран";
-                var logins = await _context.Users.Select(x => x.Name).AsNoTracking().ToListAsync();
+                var logins = await Context.Users.Select(x => x.Name).AsNoTracking().ToListAsync();
                 loginViewModel.Logins = logins;
 
                 return View(loginViewModel);
             }
 
-            var user = await _context.Users.Where(x => x.Name == loginViewModel.User.Name
+            var user = await Context.Users.Where(x => x.Name == loginViewModel.User.Name
                                                  && x.Password == _encodingService.GetHashCode(loginViewModel.User.Password)
                                                  && x.Blocked == false)
                 .Include(x => x.Role)
@@ -63,7 +64,7 @@ namespace MonamourWeb.Controllers
             if (user == null)
             {
                 ViewData["WrongPassword"] = "Неверный пароль";
-                var logins = await _context.Users.Select(x => x.Name).AsNoTracking().ToListAsync();
+                var logins = await Context.Users.Select(x => x.Name).AsNoTracking().ToListAsync();
                 loginViewModel.Logins = logins;
                 
                 return View(loginViewModel);

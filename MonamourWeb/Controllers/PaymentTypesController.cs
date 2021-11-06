@@ -1,24 +1,24 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MonamourWeb.Models;
 using MonamourWeb.Services.Filters;
+using MonamourWeb.Services.Logs;
 
 namespace MonamourWeb.Controllers
 {
     [Authorize]
-    public class PaymentTypesController : Controller
+    public class PaymentTypesController : BaseController
     {
-        private readonly MonamourDataBaseContext _context;
-
-        public PaymentTypesController(MonamourDataBaseContext context)
+        public PaymentTypesController(MonamourDataBaseContext context, ILogService logService)
+            : base(context, logService)
         {
-            _context = context;
         }
 
         [UserRoleFilter]
         public IActionResult All()
         {
-            var paymentTypes = _context.PaymentTypes;
+            var paymentTypes = Context.PaymentTypes;
             return View(paymentTypes);
         }
 
@@ -32,12 +32,13 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(PaymentType paymentType)
+        public async Task<IActionResult> Create(PaymentType paymentType)
         {
             if (ModelState.IsValid)
             {
-                _context.PaymentTypes.Add(paymentType);
-                _context.SaveChanges();
+                Context.PaymentTypes.Add(paymentType);
+                await Context.SaveChangesAsync();
+                await LogService.AddCreationLogAsync<PaymentType>(paymentType, UserId);
                 return RedirectToAction("All");
             }
             return View();
@@ -50,7 +51,7 @@ namespace MonamourWeb.Controllers
             if (id == null || id == 0)
                 return NotFound();
 
-            var paymentType = _context.PaymentTypes.Find(id);
+            var paymentType = Context.PaymentTypes.Find(id);
             
             if (paymentType == null)
                 return NotFound();
@@ -61,16 +62,21 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdatePost(PaymentType paymentType)
+        public async Task<IActionResult> Update(PaymentType paymentType)
         {
-            var editedPaymentType = _context.PaymentTypes.Find(paymentType.Id);
-            if (editedPaymentType == null)
-                return NotFound();
+            if (ModelState.IsValid)
+            {
+                var editedPaymentType = await Context.PaymentTypes.FindAsync(paymentType.Id);
+                if (editedPaymentType == null)
+                    return NotFound();
+                var oldPaymentType = editedPaymentType.Clone() as PaymentType;
+                editedPaymentType.Type = paymentType.Type;
 
-            editedPaymentType.Type = paymentType.Type;
-
-            _context.SaveChanges();
-            return RedirectToAction("All");
+                await Context.SaveChangesAsync();
+                await LogService.AddUpdatedLogAsync<PaymentType>(oldPaymentType, editedPaymentType, UserId);
+                return RedirectToAction("All");
+            }
+            return Update(paymentType.Id);
         }
 
         [UserRoleFilter]
@@ -80,7 +86,7 @@ namespace MonamourWeb.Controllers
             if (id == null || id == 0)
                 return NotFound();
 
-            var paymentType = _context.PaymentTypes.Find(id);
+            var paymentType = Context.PaymentTypes.Find(id);
 
             if (paymentType == null)
                 return NotFound();
@@ -91,13 +97,14 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeletePost(int? id)
+        public async Task<IActionResult> DeletePost(int? id)
         {
-            var paymentType = _context.PaymentTypes.Find(id);
+            var paymentType = await Context.PaymentTypes.FindAsync(id);
             if (paymentType == null)
                 return NotFound();
-            _context.PaymentTypes.Remove(paymentType);
-            _context.SaveChanges();
+            Context.PaymentTypes.Remove(paymentType);
+            await Context.SaveChangesAsync();
+            await LogService.AddDeletedLogAsync<PaymentType>(paymentType, UserId);
             return RedirectToAction("All");
         }
     }

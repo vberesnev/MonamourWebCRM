@@ -3,7 +3,7 @@
     ViewData["Title"] = "Редактировать процедуру";
 }
 
-<form method="post" asp-controller="Procedures" asp-action="UpdatePost">
+<form method="post" asp-controller="Procedures" asp-action="Update">
     <input asp-for="Procedure.Id" hidden />
     <div class="border p-3">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -20,6 +20,7 @@
                 </td>
                 <td>
                     <input asp-for="Procedure.Title" value="@Model.Procedure.Title" class="form-control" />
+                    <span asp-validation-for="Procedure.Title" class="text-danger"></span>
                 </td>
             </tr>
             <tr>
@@ -35,6 +36,7 @@
                             <option value="@item.Id">@item.Title</option>
                         }
                     </select>
+                    <span asp-validation-for="Procedure.AnimalId" class="text-danger"></span>
                 </td>
             </tr>
             <tr>
@@ -43,6 +45,14 @@
                 </td>
                 <td>
                     <input asp-for="Procedure.Cost" value="@Model.Procedure.Cost" class="form-control" />
+                </td>
+            </tr>
+            <tr>
+                <td class="w-25">
+                    <label asp-for="Procedure.ApproximateTime" class="font-weight-bold"></label>
+                </td>
+                <td>
+                    <input asp-for="Procedure.ApproximateTime" value="@Model.Procedure.ApproximateTime" class="form-control" />
                 </td>
             </tr>
             <tr>

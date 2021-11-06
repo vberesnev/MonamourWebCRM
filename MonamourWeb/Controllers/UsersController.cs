@@ -14,17 +14,13 @@ using MonamourWeb.ViewModels;
 namespace MonamourWeb.Controllers
 {
     [Authorize]
-    public class UsersController : Controller
+    public class UsersController : BaseController
     {
-        private readonly MonamourDataBaseContext _context;
         private readonly IEncodingService _encodingService;
-        private readonly ILogService _logService;
-
-        public UsersController(MonamourDataBaseContext context, IEncodingService encodingService, ILogService logService)
+        public UsersController(MonamourDataBaseContext context, ILogService logService, IEncodingService encodingService)
+            : base(context, logService)
         {
-            _context = context;
             _encodingService = encodingService;
-            _logService = logService;
         }
 
         [UserRoleFilter]
@@ -37,7 +33,7 @@ namespace MonamourWeb.Controllers
 
             ViewData["CurrentSearch"] = search;
             
-            var users = _context.Users.Include(x => x.Role).AsQueryable();
+            var users = Context.Users.Include(x => x.Role).AsQueryable();
             
             if (!string.IsNullOrEmpty(search))
             {
@@ -66,7 +62,7 @@ namespace MonamourWeb.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            var roles = _context.UserRoles.ToList();
+            var roles = Context.UserRoles.ToList();
             var viewModel = new UserViewModel() 
             {
                 Roles = roles
@@ -77,18 +73,18 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(UserViewModel userViewModel)
+        public async Task<IActionResult> Create(UserViewModel userViewModel)
         {
             if (ModelState.IsValid)
             {
                 userViewModel.User.Password = _encodingService.GetHashCode(userViewModel.User.Password);
-                _context.Users.Add(userViewModel.User);
-                _context.SaveChanges();
-                _logService.AddCreationLogAsync<User>(userViewModel.User,
-                                            Convert.ToInt32(User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value));
+                userViewModel.User.Role = Context.UserRoles.Find(userViewModel.User.RoleId);
+                Context.Users.Add(userViewModel.User);
+                await Context.SaveChangesAsync();
+                await LogService.AddCreationLogAsync<User>(userViewModel.User, UserId);
                 return RedirectToAction("All");
             }
-            userViewModel.Roles = _context.UserRoles.ToList();
+            userViewModel.Roles = Context.UserRoles.ToList();
             return View(userViewModel);
         }
 
@@ -99,12 +95,14 @@ namespace MonamourWeb.Controllers
             if (id == null || id == 0)
                 return NotFound();
 
-            var user = _context.Users.Include(x => x.Role).FirstOrDefault(x => x.Id == id);
+            var user = Context.Users
+                .Include(x => x.Role)
+                .FirstOrDefault(x => x.Id == id);
             
             if (user == null)
                 return NotFound();
 
-            var roles = _context.UserRoles.ToList();
+            var roles = Context.UserRoles.ToList();
             var userViewModel = new UserViewModel()
             {
                 User = user,
@@ -116,20 +114,31 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdatePost(UserViewModel userViewModel)
+        public async Task<IActionResult> Update(UserViewModel userViewModel)
         {
-            var user = _context.Users.Find(userViewModel.User.Id);
-            if (user == null)
-                return NotFound();
+            if (ModelState.IsValid)
+            {
+                var user = Context.Users
+                    .Include(x => x.Role)
+                    .FirstOrDefault(x => x.Id == userViewModel.User.Id);
+                if (user == null)
+                    return NotFound();
 
-            user.Name = userViewModel.User.Name;
-            user.RoleId = userViewModel.User.RoleId;
+                var oldUser = user.Clone() as User;
 
-            if (!string.IsNullOrEmpty(userViewModel.User.Password))
-                user.Password = _encodingService.GetHashCode(userViewModel.User.Password);
+                user.Name = userViewModel.User.Name;
+                user.RoleId = userViewModel.User.RoleId;
+                user.Role = await Context.UserRoles.FindAsync(user.RoleId);
 
-            _context.SaveChanges();
-            return RedirectToAction("All");
+                if (!string.IsNullOrEmpty(userViewModel.User.Password))
+                    user.Password = _encodingService.GetHashCode(userViewModel.User.Password);
+
+                await Context.SaveChangesAsync();
+                await LogService.AddUpdatedLogAsync<User>(oldUser,  user, UserId);
+                return RedirectToAction("All");
+            }
+
+            return Update(userViewModel.User.Id);
         }
 
         [UserRoleFilter]
@@ -139,24 +148,27 @@ namespace MonamourWeb.Controllers
             if (id == null || id == 0)
                 return NotFound();
 
-            var user = _context.Users.Include(x => x.Role).FirstOrDefault(x => x.Id == id);
+            var user = Context.Users
+                .Include(x => x.Role)
+                .FirstOrDefault(x => x.Id == id);
 
             if (user == null)
                 return NotFound();
-
             return View(user);
         }
 
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult BlockPost(int? id)
+        public async Task<IActionResult> BlockPost(int? id)
         {
-            var user = _context.Users.Find(id);
+            var user = await Context.Users.FindAsync(id);
             if (user == null)
                 return NotFound();
+            
             user.Blocked = true;
-            _context.SaveChanges();
+            await Context.SaveChangesAsync();
+            await LogService.AddBlockUserLogAsync(user.Name, UserId);
             return RedirectToAction("All");
         }
 
@@ -167,7 +179,9 @@ namespace MonamourWeb.Controllers
             if (id == null || id == 0)
                 return NotFound();
 
-            var user = _context.Users.Include(x => x.Role).FirstOrDefault(x => x.Id == id);
+            var user = Context.Users
+                .Include(x => x.Role)
+                .FirstOrDefault(x => x.Id == id);
 
             if (user == null)
                 return NotFound();
@@ -178,13 +192,14 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UnblockPost(int? id)
+        public async Task<IActionResult> UnblockPost(int? id)
         {
-            var user = _context.Users.Find(id);
+            var user = await Context.Users.FindAsync(id);
             if (user == null)
                 return NotFound();
             user.Blocked = false;
-            _context.SaveChanges();
+            await Context.SaveChangesAsync();
+            await LogService.AddUnblockUserLogAsync(user.Name, UserId);
             return RedirectToAction("All");
         }
     }

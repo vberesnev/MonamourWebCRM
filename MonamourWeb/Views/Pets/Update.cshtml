@@ -2,7 +2,7 @@
 @{
     ViewData["Title"] = "Обновить питомца";
 }
-<form method="post" asp-controller="Pets" asp-action="UpdatePost">
+<form method="post" asp-controller="Pets" asp-action="Update">
     <input asp-for="@Model.Pet.Id" hidden />
     <div class="border p-3">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -29,7 +29,7 @@
                     <select asp-for="@Model.Pet.BreedId" class="form-control mt-1" id="breedSelector">
                         <option value="@Model.Pet.BreedId" selected>@Model.Pet.Breed.Title</option>
                     </select>
-
+                    <span asp-validation-for="@Model.Pet.BreedId" class="text-danger"></span>
                 </td>
             </tr>
             <tr>

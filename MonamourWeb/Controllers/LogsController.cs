@@ -6,19 +6,18 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using MonamourWeb.Models;
 using MonamourWeb.Services.Filters;
+using MonamourWeb.Services.Logs;
 using MonamourWeb.Services.Pagination;
 using MonamourWeb.ViewModels;
 
 namespace MonamourWeb.Controllers
 {
     [Authorize]
-    public class LogsController : Controller
+    public class LogsController : BaseController
     {
-        private readonly MonamourDataBaseContext _context;
-
-        public LogsController(MonamourDataBaseContext context)
+        public LogsController(MonamourDataBaseContext context, ILogService logService)
+            : base(context, logService)
         {
-            _context = context;
         }
 
         [UserRoleFilter]
@@ -32,12 +31,12 @@ namespace MonamourWeb.Controllers
             viewModel.PageSettings.Search = search;
             viewModel.PageSettings.PageSize = pageSize ?? 50;
             viewModel.PageSettings.PageSizes = PageSize.GetSelectListItems(pageSize);
-            viewModel.Users = _context.Users;
+            viewModel.Users = Context.Users;
             viewModel.UserId = userId;
             viewModel.Begin = begin;
             viewModel.End = end;
 
-            var logs = _context.Logs.Include(x => x.User).Where(x => x.Date >= begin && x.Date < end.Value.AddDays(1)).AsQueryable();
+            var logs = Context.Logs.Include(x => x.User).Where(x => x.Date >= begin && x.Date < end.Value.AddDays(1)).AsQueryable();
 
             if (userId != null)
                 logs = logs.Where(x => x.UserId == userId);

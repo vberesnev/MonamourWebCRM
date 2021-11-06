@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using MonamourWeb.Models;
 using MonamourWeb.Services.Filters;
+using MonamourWeb.Services.Logs;
 using MonamourWeb.Services.Pagination;
 using MonamourWeb.ViewModels;
 
@@ -13,16 +14,14 @@ namespace MonamourWeb.Controllers
     [Authorize]
     public class PetTagsController : BaseTagController
     {
-        private readonly MonamourDataBaseContext _context;
-
-        public PetTagsController(MonamourDataBaseContext context) : base()
+        public PetTagsController(MonamourDataBaseContext context, ILogService logService) 
+            : base(context, logService)
         {
-            _context = context;
         }
 
         public async Task<IActionResult> All()
         {
-            var petTags = _context.PetTags;
+            var petTags = Context.PetTags;
             return View(await petTags.AsNoTracking().ToListAsync());
         }
 
@@ -37,12 +36,13 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(PetTag petTag)
+        public async Task<IActionResult> Create(PetTag petTag)
         {
             if (ModelState.IsValid)
             {
-                _context.PetTags.Add(petTag);
-                _context.SaveChanges();
+                Context.PetTags.Add(petTag);
+                await Context.SaveChangesAsync();
+                await LogService.AddCreationLogAsync<PetTag>(petTag, UserId);
                 return RedirectToAction("All");
             }
 
@@ -56,12 +56,12 @@ namespace MonamourWeb.Controllers
             if (id == null || id == 0)
                 return NotFound();
 
-            var petTag = _context.PetTags.Find(id);
+            var petTag = await Context.PetTags.FindAsync(id);
             
             if (petTag == null)
                 return NotFound();
 
-            var pets = _context.Pets
+            var pets = Context.Pets
                                         .Include(x => x.Clients)
                                         .Include(x => x.Breed)
                                         .Where(x => x.Tags.Any(tag => tag.Id == petTag.Id));
@@ -81,7 +81,7 @@ namespace MonamourWeb.Controllers
             if (id == null || id == 0)
                 return NotFound();
 
-            var petTag = _context.PetTags.Find(id);
+            var petTag = Context.PetTags.Find(id);
             
             if (petTag == null)
                 return NotFound();
@@ -93,24 +93,26 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdatePost(PetTag petTag)
+        public async Task<IActionResult> Update(PetTag petTag)
         {
-            var editedPetTag = _context.PetTags.Find(petTag.Id);
-            if (editedPetTag == null)
-                return NotFound();
-
             if (ModelState.IsValid)
             {
+                var editedPetTag = await Context.PetTags.FindAsync(petTag.Id);
+                if (editedPetTag == null)
+                    return NotFound();
+                var oldPetTag = editedPetTag.Clone() as PetTag;
+
                 editedPetTag.Title = petTag.Title;
                 editedPetTag.ShortTitle = petTag.ShortTitle;
                 editedPetTag.Color = petTag.Color;
 
-                _context.SaveChanges();
+                await Context.SaveChangesAsync();
+                await LogService.AddUpdatedLogAsync<PetTag>(oldPetTag, editedPetTag, UserId);
                 return RedirectToAction("All");
             }
 
             ViewBag.Colors = Colors;
-            return RedirectToAction("Update", new {id = petTag.Id});
+            return Update(petTag.Id);
         }
 
         [UserRoleFilter]
@@ -120,7 +122,7 @@ namespace MonamourWeb.Controllers
             if (id == null || id == 0)
                 return NotFound();
 
-            var petTag = _context.PetTags.Find(id);
+            var petTag = Context.PetTags.Find(id);
 
             if (petTag == null)
                 return NotFound();
@@ -131,13 +133,14 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeletePost(int? id)
+        public async Task<IActionResult> DeletePost(int? id)
         {
-            var petTag = _context.PetTags.Find(id);
+            var petTag = await Context.PetTags.FindAsync(id);
             if (petTag == null)
                 return NotFound();
-            _context.PetTags.Remove(petTag);
-            _context.SaveChanges();
+            Context.PetTags.Remove(petTag);
+            await Context.SaveChangesAsync();
+            await LogService.AddDeletedLogAsync<PetTag>(petTag, UserId);
             return RedirectToAction("All");
         }
     }

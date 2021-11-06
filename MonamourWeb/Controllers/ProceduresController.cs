@@ -5,19 +5,18 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using MonamourWeb.Models;
 using MonamourWeb.Services.Filters;
+using MonamourWeb.Services.Logs;
 using MonamourWeb.Services.Pagination;
 using MonamourWeb.ViewModels;
 
 namespace MonamourWeb.Controllers
 {
     [Authorize]
-    public class ProceduresController : Controller
+    public class ProceduresController : BaseController
     {
-        private readonly MonamourDataBaseContext _context;
-
-        public ProceduresController(MonamourDataBaseContext context)
+        public ProceduresController(MonamourDataBaseContext context, ILogService logService)
+            : base(context, logService)
         {
-            _context = context;
         }
 
         public async Task<IActionResult> All(string sort, string search, int? animalId, int? page, int? pageSize)
@@ -27,10 +26,10 @@ namespace MonamourWeb.Controllers
             viewModel.PageSettings.Search = search;
             viewModel.PageSettings.PageSize = pageSize ?? 25;
             viewModel.PageSettings.PageSizes = PageSize.GetSelectListItems(pageSize);
-            viewModel.Animals = _context.Animals;
+            viewModel.Animals = Context.Animals;
             viewModel.AnimalId = animalId;
             
-            var procedures = _context.Procedures.Include(x => x.Animal).AsQueryable();
+            var procedures = Context.Procedures.Include(x => x.Animal).AsQueryable();
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -69,7 +68,7 @@ namespace MonamourWeb.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            var animals = _context.Animals.ToList();
+            var animals = Context.Animals.ToList();
             var viewModel = new ProcedureViewModel() 
             {
                 Animals = animals
@@ -80,15 +79,17 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(ProcedureViewModel procedureViewModel)
+        public async Task<IActionResult> Create(ProcedureViewModel procedureViewModel)
         {
             if (ModelState.IsValid)
             {
-                _context.Procedures.Add(procedureViewModel.Procedure);
-                _context.SaveChanges();
+                procedureViewModel.Procedure.Animal = await Context.Animals.FindAsync(procedureViewModel.Procedure.AnimalId);
+                Context.Procedures.Add(procedureViewModel.Procedure);
+                await Context.SaveChangesAsync();
+                await LogService.AddCreationLogAsync<Procedure>(procedureViewModel.Procedure, UserId);
                 return RedirectToAction("All");
             }
-            procedureViewModel.Animals = _context.Animals.ToList();
+            procedureViewModel.Animals = Context.Animals.ToList();
             return View(procedureViewModel);
         }
 
@@ -99,12 +100,14 @@ namespace MonamourWeb.Controllers
             if (id == null || id == 0)
                 return NotFound();
 
-            var procedure = _context.Procedures.Include(x => x.Animal).FirstOrDefault(x => x.Id == id);
+            var procedure = Context.Procedures
+                .Include(x => x.Animal)
+                .FirstOrDefault(x => x.Id == id);
             
             if (procedure == null)
                 return NotFound();
 
-            var animals = _context.Animals.ToList();
+            var animals = Context.Animals.ToList();
             var procedureViewModel = new ProcedureViewModel()
             {
                 Procedure = procedure,
@@ -116,19 +119,30 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdatePost(ProcedureViewModel procedureViewModel)
+        public async Task<IActionResult> Update(ProcedureViewModel procedureViewModel)
         {
-            var procedure = _context.Procedures.Find(procedureViewModel.Procedure.Id);
-            if (procedure == null)
-                return NotFound();
+            if (ModelState.IsValid)
+            {
+                var procedure = Context.Procedures
+                    .Include(x => x.Animal)
+                    .FirstOrDefault(x => x.Id == procedureViewModel.Procedure.Id);
+                if (procedure == null)
+                    return NotFound();
+                var oldProcedure = procedure.Clone() as Procedure;
 
-            procedure.Title = procedureViewModel.Procedure.Title;
-            procedure.AnimalId = procedureViewModel.Procedure.AnimalId;
-            procedure.Cost = procedureViewModel.Procedure.Cost;
-            procedure.Info = procedureViewModel.Procedure.Info;
-            
-            _context.SaveChanges();
-            return RedirectToAction("All");
+                procedure.Title = procedureViewModel.Procedure.Title;
+                procedure.AnimalId = procedureViewModel.Procedure.AnimalId;
+                procedure.Cost = procedureViewModel.Procedure.Cost;
+                procedure.Info = procedureViewModel.Procedure.Info;
+                procedure.ApproximateTime = procedureViewModel.Procedure.ApproximateTime;
+                procedure.Animal = await Context.Animals.FindAsync(procedure.AnimalId);
+
+                await Context.SaveChangesAsync();
+                await LogService.AddUpdatedLogAsync(oldProcedure, procedure, UserId);
+                return RedirectToAction("All");
+            }
+
+            return Update(procedureViewModel.Procedure.Id);
         }
 
         [UserRoleFilter]
@@ -138,7 +152,9 @@ namespace MonamourWeb.Controllers
             if (id == null || id == 0)
                 return NotFound();
 
-            var procedure = _context.Procedures.Include(x => x.Animal).FirstOrDefault(x => x.Id == id);
+            var procedure = Context.Procedures
+                .Include(x => x.Animal)
+                .FirstOrDefault(x => x.Id == id);
 
             if (procedure == null)
                 return NotFound();
@@ -149,13 +165,16 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeletePost(int? id)
+        public async Task<IActionResult> DeletePost(int? id)
         {
-            var procedure = _context.Procedures.Find(id);
+            var procedure = Context.Procedures
+                .Include(x => x.Animal)
+                .FirstOrDefault(x => x.Id == id);
             if (procedure == null)
                 return NotFound();
-            _context.Procedures.Remove(procedure);
-            _context.SaveChanges();
+            Context.Procedures.Remove(procedure);
+            await Context.SaveChangesAsync();
+            await LogService.AddDeletedLogAsync(procedure, UserId);
             return RedirectToAction("All");
         }
     }

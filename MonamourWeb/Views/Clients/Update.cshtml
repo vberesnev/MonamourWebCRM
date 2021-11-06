@@ -2,7 +2,7 @@
 @{ 
     ViewData["Title"] = "Редактировать клиента";
 }
-<form method="post" asp-controller="Clients" asp-action="UpdatePost">
+<form method="post" asp-controller="Clients" asp-action="Update">
     <input asp-for="@Model.Client.Id" hidden />
     <div class="border p-3">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>

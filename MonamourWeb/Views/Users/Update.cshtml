@@ -3,7 +3,7 @@
     ViewData["Title"] = "Редактировать пользователя";
 }
 
-<form method="post" asp-controller="Users" asp-action="UpdatePost">
+<form method="post" asp-controller="Users" asp-action="Update">
     <input asp-for="User.Id" hidden />
     <div class="border p-3">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -19,7 +19,8 @@
                     <label asp-for="User.Name" class="font-weight-bold"></label>
                 </td>
                 <td>
-                    <input asp-for="User.Name" value="@Model.User.Name" class="form-control"/>
+                    <input asp-for="User.Name" value="@Model.User.Name" class="form-control" />
+                    <span asp-validation-for="User.Name" class="text-danger"></span>
                 </td>
             </tr>
             <tr>
@@ -35,6 +36,7 @@
                             <option value="@item.Id">@item.Title</option>
                         }
                     </select>
+                    <span asp-validation-for="User.Role" class="text-danger"></span>
                 </td>
             </tr>
             <tr>
@@ -43,7 +45,8 @@
                     <label for="passwordCheckbox" class="font-weight-bold">Сменить пароль</label>
                 </td>
                 <td>
-                    <input asp-for="User.Password" value="" disabled class="form-control" id="passwordTextbox"/>
+                    <input asp-for="User.Password" value="" disabled class="form-control" id="passwordTextbox" />
+                    <span asp-validation-for="User.Password" class="text-danger"></span>
                 </td>
             </tr>
         </table>

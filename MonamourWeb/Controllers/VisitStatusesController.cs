@@ -1,24 +1,24 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MonamourWeb.Models;
 using MonamourWeb.Services.Filters;
+using MonamourWeb.Services.Logs;
 
 namespace MonamourWeb.Controllers
 {
     [Authorize]
-    public class VisitStatusesController : Controller
+    public class VisitStatusesController : BaseController
     {
-        private readonly MonamourDataBaseContext _context;
-
-        public VisitStatusesController(MonamourDataBaseContext context)
+        public VisitStatusesController(MonamourDataBaseContext context, ILogService logService)
+            : base(context, logService)
         {
-            _context = context;
         }
 
         [UserRoleFilter]
         public IActionResult All()
         {
-            var visitStatuses = _context.VisitStatuses;
+            var visitStatuses = Context.VisitStatuses;
             return View(visitStatuses);
         }
 
@@ -32,12 +32,13 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(VisitStatus visitStatus)
+        public async Task<IActionResult> Create(VisitStatus visitStatus)
         {
             if (ModelState.IsValid)
             {
-                _context.VisitStatuses.Add(visitStatus);
-                _context.SaveChanges();
+                Context.VisitStatuses.Add(visitStatus);
+                await Context.SaveChangesAsync();
+                await LogService.AddCreationLogAsync(visitStatus, UserId);
                 return RedirectToAction("All");
             }
             return View();
@@ -50,7 +51,7 @@ namespace MonamourWeb.Controllers
             if (id == null || id == 0)
                 return NotFound();
 
-            var visitStatus = _context.VisitStatuses.Find(id);
+            var visitStatus = Context.VisitStatuses.Find(id);
             
             if (visitStatus == null)
                 return NotFound();
@@ -61,16 +62,22 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdatePost(VisitStatus visitStatus)
+        public async Task<IActionResult> Update(VisitStatus visitStatus)
         {
-            var editedVisitStatus = _context.PaymentTypes.Find(visitStatus.Id);
-            if (editedVisitStatus == null)
-                return NotFound();
+            if (ModelState.IsValid)
+            {
+                var editedVisitStatus = await Context.VisitStatuses.FindAsync(visitStatus.Id);
+                if (editedVisitStatus == null)
+                    return NotFound();
+                var oldVisitStatus = editedVisitStatus.Clone() as VisitStatus;
+                editedVisitStatus.Status = visitStatus.Status;
 
-            editedVisitStatus.Type = visitStatus.Status;
+                await Context.SaveChangesAsync();
+                await LogService.AddUpdatedLogAsync(oldVisitStatus, editedVisitStatus, UserId);
+                return RedirectToAction("All");
+            }
 
-            _context.SaveChanges();
-            return RedirectToAction("All");
+            return Update(visitStatus.Id);
         }
 
         [UserRoleFilter]
@@ -80,7 +87,7 @@ namespace MonamourWeb.Controllers
             if (id == null || id == 0)
                 return NotFound();
 
-            var visitStatus = _context.VisitStatuses.Find(id);
+            var visitStatus = Context.VisitStatuses.Find(id);
 
             if (visitStatus == null)
                 return NotFound();
@@ -91,13 +98,14 @@ namespace MonamourWeb.Controllers
         [UserRoleFilter]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeletePost(int? id)
+        public async Task<IActionResult> DeletePost(int? id)
         {
-            var visitStatus = _context.VisitStatuses.Find(id);
+            var visitStatus = await Context.VisitStatuses.FindAsync(id);
             if (visitStatus == null)
                 return NotFound();
-            _context.VisitStatuses.Remove(visitStatus);
-            _context.SaveChanges();
+            Context.VisitStatuses.Remove(visitStatus);
+            await Context.SaveChangesAsync();
+            await LogService.AddDeletedLogAsync(visitStatus, UserId);
             return RedirectToAction("All");
         }
     }

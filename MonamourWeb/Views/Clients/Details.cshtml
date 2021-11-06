@@ -40,7 +40,7 @@
                 <select multiple id="clientsTags" class="form-control">
                     @foreach (var item in Model.Pets)
                     {
-                        <option value="@item.Id">@item.Name</option>
+                    <option value="@item.Id">@item.Name (@item.Breed.Title)</option>
                     }
                 </select>
             </td>

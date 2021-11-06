@@ -3,7 +3,7 @@
     ViewData["Title"] = "Редактировать породу";
 }
 
-<form method="post" asp-controller="Breeds" asp-action="UpdatePost">
+<form method="post" asp-controller="Breeds" asp-action="Update">
     <input asp-for="Breed.Id" hidden />
     <div class="border p-3">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -20,6 +20,7 @@
                 </td>
                 <td>
                     <input asp-for="Breed.Title" value="@Model.Breed.Title" class="form-control" />
+                    <span asp-validation-for="Breed.Title" class="text-danger"></span>
                 </td>
             </tr>
             <tr>

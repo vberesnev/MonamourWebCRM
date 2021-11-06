@@ -1,9 +1,10 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace MonamourWeb.Models
 {
-    public class VisitProcedure
+    public class VisitProcedure 
     {
         public int Id { get; set; }
         

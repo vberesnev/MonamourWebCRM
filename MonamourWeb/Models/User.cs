@@ -1,24 +1,24 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace MonamourWeb.Models
 {
-    public class User
+    public class User : ICloneable
     {
         public int Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Пользователь должен иметь логин")]
         [DisplayName("Логин")]
         public string Name { get; set; }
         
-        [Required]
         [DisplayName("Пароль")]
         public string Password { get; set; }
         
         [DisplayName("Роль")]
         public UserRole Role { get; set; }
         
-        [Required]
+        [Required(ErrorMessage = "Пользователь должен иметь роль")]
         public int RoleId { get; set; }
 
         [DisplayName("Заблокирован")]
@@ -26,7 +26,20 @@ namespace MonamourWeb.Models
 
         public override string ToString()
         {
-            return $"Пользователь: [Id]: {Id}; [Логин]: {Name}; [Id роли]: {RoleId}: [Заблокирован]: {Helper.BoolToStringConverter(Blocked)}";
+            return $"Пользователь: [Id]: {Id}; [Логин]: {Name}; [Id роли]: {RoleId}; [Роль]: {Role?.Title}; [Заблокирован]: {Helper.BoolToStringConverter(Blocked)}";
+        }
+
+        public object Clone()
+        {
+            return new User()
+            {
+                Id = this.Id,
+                Name = this.Name,
+                Password = this.Password,
+                Role = this.Role?.Clone() as UserRole,
+                RoleId = this.RoleId,
+                Blocked = this.Blocked
+            };
         }
     }
 }

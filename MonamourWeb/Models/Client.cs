@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace MonamourWeb.Models
 {
-    public class Client
+    public class Client : ICloneable
     {
         public int Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "У клиента должно быть имя")]
         [DisplayName("Имя")]
         public string Name { get; set; }
 
@@ -102,6 +103,32 @@ namespace MonamourWeb.Models
 
             Pets = client.Pets;
             Tags = client.Tags;
+        }
+
+        public override string ToString()
+        {
+            var pets = string.Join(" ", Pets.Select(x => x.Name + " (" + x.Breed?.Title + ") [" + x.Id + "]"));
+            var tags = string.Join(" ", Tags.Select(x => x.Title + " [" + x.Id + "]"));
+
+            return $"Клиент: [Id]: {Id}; [Имя]: {Name}; [Телефон]: {Phone}; [E-mail]: {Email}; [Instagram]: {Instagram}; [Соц. сети]: {Social};" +
+                   $" [Инфо]: {Info}; [Бонусы]: {Bonus}; [Питомцы]: {pets}; [Тэги]: {tags};";
+        }
+
+        public object Clone()
+        {
+            return new Client()
+            {
+                Id = this.Id,
+                Name = this.Name,
+                Phone = this.Phone,
+                Email = this.Email,
+                Instagram = this.Instagram,
+                Social = this.Social,
+                Info = this.Info,
+                Bonus = this.Bonus,
+                Pets = this.Pets,
+                Tags = this.Tags
+            };
         }
     }
 }
