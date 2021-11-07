@@ -146,6 +146,22 @@ namespace MonamourWeb.Controllers
             }
             return Json(pets); 
         }
+
+        [HttpPost]
+        public JsonResult CheckPhone([FromBody] string phoneNumber)
+        {
+            var phones = phoneNumber.Split(" ");
+
+            var clients = new List<Client>();
+
+            foreach (var phone in phones)
+            {
+                if (string.IsNullOrEmpty(phone))
+                    continue;
+                clients.AddRange(Context.Clients.Where(x => x.Phone.Contains(phone)));
+            }
+            return Json(clients);
+        }
         
         [UserRoleFilter]
         [HttpGet]
@@ -207,7 +223,8 @@ namespace MonamourWeb.Controllers
                 var tags = Context.ClientTags.Where(x => clientTags.Contains(x.Id));
                 foreach (var tag in tags)
                     clientViewModel.Client.Tags.Add(tag);
-                
+                clientViewModel.Client.Name = clientViewModel.Client.Name?.Trim();
+
                 Context.Clients.Add(clientViewModel.Client);
                 await Context.SaveChangesAsync();
                 await LogService.AddCreationLogAsync<Client>(clientViewModel.Client, UserId);
@@ -215,5 +232,7 @@ namespace MonamourWeb.Controllers
             }
             return View(clientViewModel);
         }
+
+
     }
 }

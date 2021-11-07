@@ -93,7 +93,7 @@ namespace MonamourWeb.Models
 
         public void Update(Client client)
         {
-            Name = client.Name;
+            Name = client.Name?.Trim();
             Phone = client.Phone;
             Email = client.Email;
             Instagram = client.Instagram;

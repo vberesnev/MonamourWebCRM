@@ -98,6 +98,25 @@ namespace MonamourWeb.Controllers
         }
 
         [HttpPost]
+        public async Task<ActionResult> CreateQuick(string name, int id, string day)
+        {
+            var pet = new Pet()
+            {
+                Name = name,
+                BreedId = id,
+                Bday = day,
+                Alive = true
+            };
+
+            pet.Breed = await Context.Breeds.FindAsync(id);
+                
+            Context.Pets.Add(pet);
+            await Context.SaveChangesAsync();
+            await LogService.AddCreationLogAsync<Pet>(pet, UserId);
+            return Json(true);
+        }
+
+        [HttpPost]
         public JsonResult SearchBreed([FromBody] string search)
         {
             IQueryable<Breed> breeds;

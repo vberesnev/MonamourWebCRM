@@ -2,8 +2,8 @@
 @{ 
     ViewData["Title"] = "Редактировать клиента";
 }
-<form method="post" asp-controller="Clients" asp-action="Update">
-    <input asp-for="@Model.Client.Id" hidden />
+<form method="post" asp-controller="Clients" asp-action="Update" id="updateForm">
+    <input asp-for="@Model.Client.Id" hidden id="clientId" />
     <div class="border p-3">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="form-group row">
@@ -27,12 +27,12 @@
                 <td colspan="2">
                     @if (Context.User.IsInRole("Admin"))
                     {
-                        <input asp-for="@Model.Client.Phone" class="form-control" />
+                        <input asp-for="@Model.Client.Phone" class="form-control" id="clientsPhone" />
                     }
                     else
                     {
-                        <input type="text" asp-for="@Model.Client.Phone" class="form-control-plaintext" hidden readonly/>
-                        <input type="text" asp-for="@Model.Client.SecretPhone" class="form-control-plaintext" readonly/>
+                        <input type="text" asp-for="@Model.Client.Phone" class="form-control-plaintext" hidden readonly id="clientsPhone" />
+                        <input type="text" asp-for="@Model.Client.SecretPhone" class="form-control-plaintext" readonly />
                     }
                     <span asp-validation-for="@Model.Client.Phone" class="text-danger"></span>
                 </td>
@@ -89,18 +89,32 @@
                     <label asp-for="@Model.Client.Pets"></label>
                 </td>
                 <td width="40%">
-                    <select multiple id="clientsPets" class="form-control">
-                        @foreach (var item in Model.Client.Pets)
-                        {
-                            <option ondblclick="removePetFromClientFunc('@item.Id')" value="@item.Id">@item.Name (@item.Breed.Title)</option>
-                        }
-                    </select>
+                    <div class="container">
+                        <div class="row">
+                            <select multiple id="clientsPets" class="form-control">
+                                @foreach (var item in Model.Client.Pets)
+                                {
+                                    <option ondblclick="removePetFromClientFunc('@item.Id')" value="@item.Id">@item.Name (@item.Breed.Title)</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
                 </td>
                 <td width="40%">
-                    <div>
-                        <input type="text" id="petSearchTextBox" class="form-control mb-1" />
-                        <select multiple id="petSelector" class="form-control">
-                        </select>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-9 d-flex text-left">
+                                <span class="fa fa-search fa-lg mt-auto mb-auto mr-1"></span>
+                                <input type="text" id="petSearchTextBox" class="form-control mb-1 ml-1" style="min-width: 100px" />
+                            </div>
+                            <div class="col-3">
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createPetModal">Создать</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <select multiple id="petSelector" class="form-control">
+                            </select>
+                        </div>
                     </div>
                 </td>
                 <td>
@@ -149,10 +163,79 @@
         <div class="form-group row">
             <div class="col-8 offset-2 row">
                 <div class="col">
-                    <input type="submit" class="btn btn-info w-75" value="Сохранить" />
+                    <input type="button" onclick="DoesPhoneExist()" class="btn btn-info w-75" value="Сохранить" />
                 </div>
                 <div class="col">
                     <a class="btn btn-danger w-75" asp-controller="Clients" asp-action="All">Назад</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" tabindex="-1" role="dialog" id="modalWindow">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Внимание</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Вы пытаетесь сохранить клиента с уже существующим в базе номером телефона</p>
+                    <p id="messageText"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Все равно сохранить</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="createPetModal" tabindex="-1" role="dialog" aria-labelledby="createPetModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createPetModalLabel">Создать нового питомца</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-borderless text-center" style="width: 100%">
+                        <tr>
+                            <td width="20%">
+                                <label>Кличка</label>
+                            </td>
+                            <td colspan="2">
+                                <input class="form-control" id="ajaxPetName" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%">
+                                <label>Порода</label>
+                            </td>
+                            <td colspan="2">
+                                <input class="form-control mb-1" id="ajaxBreedFilter" placeholder="Введите название породы . . ." />
+                                <select class="form-control mt-1" id="breedSelector">
+                                    <option value="" disabled selected>Выберите породу</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>День рождения</label>
+                            </td>
+                            <td colspan="2">
+                                <input class="form-control" id="ajaxBday" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="AddPetAjax()">Создать</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
                 </div>
             </div>
         </div>
@@ -254,5 +337,98 @@
                 break;
             }
         }
+    }
+
+    function DoesPhoneExist() {
+        var phone = document.getElementById('clientsPhone').value;
+        $.ajax({
+            type: "post",
+            url: "/Clients/CheckPhone",
+            data: JSON.stringify(phone),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (clients) {
+                var id = parseInt(document.getElementById('clientId').value, 10);
+                if (clients.length === 0) {
+                    alert("Нет совпадений");
+                    document.getElementById("updateForm").submit();
+                }
+                else if (clients.length === 1) {
+                    if (clients[0].id === id) {
+                        alert("Одно совпадение и оно у того же объекта");
+                        document.getElementById("updateForm").submit();
+                    }
+                    else {
+                        var p = document.getElementById('messageText');
+                        p.innerHTML += "Найдено 1 совпадениe <br />";
+                        p.innerHTML += "<a href='Details/" + clients[0].id + "'>" + clients[0].name + " (" + clients[0].phone + ")</a><br />";
+                        $('#modalWindow').modal('show');
+                    }
+                }
+                else {
+                    var p = document.getElementById('messageText');
+                    p.innerHTML += "Найдено " + (clients.length-1).toString() + " совпадений <br />";
+                    for (var i = 0; i < clients.length; i++) {
+                        if (clients[i].id === id) continue;
+                        p.innerHTML += "<a href='Details/" + clients[i].id + "'>" + clients[i].name + " (" + clients[i].phone + ")</a><br />";
+                    }
+                    $('#modalWindow').modal('show');
+                }
+            }
+        });
+    }
+
+    $(function () {
+        $("#ajaxBreedFilter").keyup(function () {
+            SearchBreedAjax();
+        });
+    });
+
+    function SearchBreedAjax() {
+        var breed = $.trim($("#ajaxBreedFilter").val());
+        $.ajax({
+            type: "post",
+            url: "/Pets/SearchBreed",
+            data: JSON.stringify(breed),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (breeds) {
+                var select = document.getElementById('breedSelector');
+                select.innerHTML = "";
+
+                for (var i = 0; i < breeds.length; i++) {
+                    select.innerHTML += '<option value="' + breeds[i].id + '">' + breeds[i].title + '</option>';
+                }
+            }
+        });
+    }
+
+    function AddPetAjax() {
+        var petName = $.trim($("#ajaxPetName").val());
+        if (petName === "") {
+            alert("Имя питомца должно быть заполнено");
+            return;
+        }
+
+        var breed = parseInt($("#breedSelector").val(), 10);
+        if (breed === null || breed === 0) {
+            alert("Порода питомца должна быть заполнена");
+            return;
+        }
+
+        var bDay = $.trim($("#ajaxBday").val());
+
+        $.ajax({
+            type: "post",
+            url: "/Pets/CreateQuick",
+            data: { name: petName, id: breed, day: bDay },
+            dataType: "json",
+            success: function (result) {
+                var petSearchTextBox = document.getElementById('petSearchTextBox');
+                petSearchTextBox.value = petName;
+                SearchPetAjax();
+                $('#createPetModal').modal('hide');
+            }
+        });
     }
 </script>
