@@ -43,7 +43,7 @@ namespace MonamourWeb.Models
                     }
 
                     if (i + 1 != phones.Length)
-                        secretPhone += "\r\n";
+                        secretPhone += " ";
                 }
 
                 return secretPhone;

@@ -233,6 +233,19 @@ namespace MonamourWeb.Controllers
             return View(clientViewModel);
         }
 
+        [HttpPost]
+        public async Task<ActionResult> CreateQuick(string name, string phone)
+        {
+            var client = new Client()
+            {
+                Name = name,
+                Phone = phone
+            };
 
+            Context.Clients.Add(client);
+            await Context.SaveChangesAsync();
+            await LogService.AddCreationLogAsync<Client>(client, UserId);
+            return Json(true);
+        }
     }
 }

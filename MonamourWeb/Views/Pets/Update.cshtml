@@ -57,18 +57,39 @@
                     <label asp-for="@Model.Pet.Clients"></label>
                 </td>
                 <td width="40%">
-                    <select multiple id="clientsOfPetSelector" class="form-control">
-                        @foreach (var item in Model.Pet.Clients)
-                        {
-                            <option ondblclick="removeClientFromPetFunc('@item.Id')" value="@item.Id">@item.Name</option>
-                        }
-                    </select>
+                    <div class="container">
+                        <div class="row">
+                            <select multiple id="clientsOfPetSelector" class="form-control">
+                                @foreach (var item in Model.Pet.Clients)
+                                {
+                                    @if (Context.User.IsInRole("Admin"))
+                                    {
+                                        <option ondblclick="removeClientFromPetFunc('@item.Id')" value="@item.Id">@item.Name (@item.Phone) </option>
+                                    }
+                                    else
+                                    {
+                                        <option ondblclick="removeClientFromPetFunc('@item.Id')" value="@item.Id">@item.Name (@item.SecretPhone) </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
                 </td>
                 <td width="40%">
-                    <div>
-                        <input type="text" id="clientSearchTextBox" class="form-control mb-1" />
-                        <select multiple id="clientSelector" class="form-control">
-                        </select>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-9 d-flex text-left">
+                                <span class="fa fa-search fa-lg mt-auto mb-auto mr-1"></span>
+                                <input type="text" id="clientSearchTextBox" class="form-control mb-1 ml-1" style="min-width: 100px" />
+                            </div>
+                            <div class="col-3">
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createClientModal">Создать</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <select multiple id="clientSelector" class="form-control">
+                            </select>
+                        </div>
                     </div>
                 </td>
                 <td>
@@ -136,6 +157,43 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="createClientModal" tabindex="-1" role="dialog" aria-labelledby="createClientModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createPetModalLabel">Создать нового клиента</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-borderless text-center" style="width: 100%">
+                        <tr>
+                            <td width="20%">
+                                <label>Имя</label>
+                            </td>
+                            <td colspan="2">
+                                <input class="form-control" id="ajaxClientName" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%">
+                                <label>Телефон</label>
+                            </td>
+                            <td colspan="2">
+                                <input class="form-control" id="ajaxClientPhone" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="AddClientAjax()">Создать</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </form>
 
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
@@ -183,9 +241,16 @@
             success: function (clients) {
                 var select = document.getElementById('clientSelector');
                 select.innerHTML = "";
-
+                var isAdmin = '@Context.User.IsInRole("Admin")';
                 for (var i = 0; i < clients.length; i++) {
-                    select.innerHTML += '<option ondblclick="addClientToPetFunc(\'' + clients[i].id + '\', \'' + clients[i].name + '\')" value="' + clients[i].id + '">' + clients[i].name + '</option>';
+                    if (isAdmin.toLowerCase() === 'true')
+                    {
+                        select.innerHTML += '<option ondblclick="addClientToPetFunc(\'' + clients[i].id + '\', \'' + clients[i].name + " (" + clients[i].phone + ")" + '\')" value="' + clients[i].id + '">' + clients[i].name + " (" + clients[i].phone + ")" + '</option>';
+                    }
+                    else
+                    {
+                        select.innerHTML += '<option ondblclick="addClientToPetFunc(\'' + clients[i].id + '\', \'' + clients[i].name + " (" + clients[i].secretPhone + ")" + '\')" value="' + clients[i].id + '">' + clients[i].name + " (" + clients[i].secretPhone + ")" + '</option>';
+                    }
                 }
             }
         });
@@ -257,5 +322,32 @@
                 break;
             }
         }
+    }
+
+    function AddClientAjax() {
+        var clientName = $.trim($("#ajaxClientName").val());
+        if (clientName === "") {
+            alert("Имя клиента должно быть заполнено");
+            return;
+        }
+
+        var clientPhone = $.trim($("#ajaxClientPhone").val());
+        if (clientPhone === "") {
+            alert("Телефон клиента должен быть заполнен");
+            return;
+        }
+
+        $.ajax({
+            type: "post",
+            url: "/Clients/CreateQuick",
+            data: { name: clientName, phone: clientPhone },
+            dataType: "json",
+            success: function (result) {
+                var clientSearchTextBox = document.getElementById('clientSearchTextBox');
+                clientSearchTextBox.value = clientName;
+                SearchClientAjax();
+                $('#createClientModal').modal('hide');
+            }
+        });
     }
 </script>
