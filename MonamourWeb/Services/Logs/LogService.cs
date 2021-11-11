@@ -97,5 +97,17 @@ namespace MonamourWeb.Services.Logs
             _context.Logs.Add(log);
             await _context.SaveChangesAsync();
         }
+
+        public async Task AddChangePasswordLog(string userName, int userId)
+        {
+            var log = new Log()
+            {
+                Date = DateTime.Now,
+                Message = "ПОЛЬЗОВАТЕЛЬ "+ userName +" СМЕНИЛ СВОЙ ПАРОЛЬ",
+                UserId = userId
+            };
+            _context.Logs.Add(log);
+            await _context.SaveChangesAsync();
+        }
     }
 }

@@ -30,7 +30,10 @@ namespace MonamourWeb.Controllers
         {
             //await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             
-            var logins = await Context.Users.Select(x => x.Name).AsNoTracking().ToListAsync();
+            var logins = await Context.Users
+                .Select(x => x.Name)
+                .AsNoTracking()
+                .ToListAsync();
 
             var loginViewModel = new LoginViewModel()
             {
@@ -58,8 +61,8 @@ namespace MonamourWeb.Controllers
             var user = await Context.Users.Where(x => x.Name == loginViewModel.User.Name
                                                  && x.Password == _encodingService.GetHashCode(loginViewModel.User.Password)
                                                  && x.Blocked == false)
-                .Include(x => x.Role)
-                .FirstOrDefaultAsync();
+                                            .Include(x => x.Role)
+                                            .FirstOrDefaultAsync();
 
             if (user == null)
             {
@@ -116,6 +119,34 @@ namespace MonamourWeb.Controllers
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login", "Account");
+        }
+
+        [HttpGet]
+        public IActionResult MyAccount()
+        {
+            var user = Context.Users
+                .Include(x => x.Role)
+                .FirstOrDefault(x => x.Id == UserId);
+
+            if (user is null)
+                return NotFound();
+
+            return View(user);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> ChangePassword(int id, string oldPass, string newPass)
+        {
+            var user = await Context.Users.FindAsync(id);
+
+            if (user.Password == _encodingService.GetHashCode(oldPass))
+            {
+                user.Password = _encodingService.GetHashCode(newPass);
+                await Context.SaveChangesAsync();
+                await LogService.AddChangePasswordLog(user.Name, UserId);
+                return Json(new {success  = true} );
+            }
+            return Json(new {success  = false, message = "Старый пароль неверный"});
         }
     }
 }

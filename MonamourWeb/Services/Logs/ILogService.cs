@@ -11,5 +11,6 @@ namespace MonamourWeb.Services.Logs
         Task AddUpdatedLogAsync<T>(T oldObject, T newObject, int userId);
         Task AddBlockUserLogAsync(string userName, int userId);
         Task AddUnblockUserLogAsync(string userName, int userId);
+        Task AddChangePasswordLog(string userName, int userId);
     }
 }

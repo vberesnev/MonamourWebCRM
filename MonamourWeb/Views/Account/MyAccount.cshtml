@@ -1,0 +1,125 @@
+﻿@model MonamourWeb.Models.User
+@{
+    ViewData["Title"] = "Мой аккаунт";
+}
+
+    <div class="border p-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group row">
+            <h4 class="text-black-50 pl-3">Мой аккаунт</h4>
+        </div>
+
+        <table class="table table-borderless text-center" style="width: 100%">
+            <tr>
+                <td>
+                    <label asp-for="@Model.Name"></label>
+                </td>
+                <td colspan="2">
+                    <input asp-for="@Model.Name" class="form-control" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label asp-for="@Model.Role"></label>
+                </td>
+                <td colspan="2">
+                    <input asp-for="@Model.Role.Title" class="form-control" id="clientsPhone" />
+                </td>
+            </tr>
+        </table>
+
+        <div class="form-group row">
+            <div class="col-4 row">
+                <div class="col">
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#changePasswordModal">Сменить пароль</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createPetModalLabel">Сменить пароль</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input asp-for="@Model.Id" hidden id="ajaxUserId" />
+                    <table class="table table-borderless text-center" style="width: 100%">
+                        <tr>
+                            <td width="40%">
+                                <label>Старый пароль</label>
+                            </td>
+                            <td colspan="2">
+                                <input type="password" class="form-control" id="ajaxOldPassword" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%">
+                                <label>Новый пароль</label>
+                            </td>
+                            <td colspan="2">
+                                <input type="password" class="form-control" id="ajaxNewPassword" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%">
+                                <label>Еще раз новый пароль</label>
+                            </td>
+                            <td colspan="2">
+                                <input type="password" class="form-control" id="ajaxNewPasswordConfirm" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="ChangePasswordAjax()">Сменить</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript">
+
+    function ChangePasswordAjax() {
+        var userId = parseInt(document.getElementById('ajaxUserId').value, 10);
+        var oldPass = $.trim($("#ajaxOldPassword").val());
+        var newPass = $.trim($("#ajaxNewPassword").val());
+        var newPassConfirm = $.trim($("#ajaxNewPasswordConfirm").val());
+
+        if (oldPass === "" || newPass === "" || newPassConfirm === "") {
+            alert("Все поля должны быть заполнены");
+            return;
+        }
+
+        if (newPass != newPassConfirm) {
+            alert("Новые пароли должны быть равны!");
+            return;
+        }
+
+        $.ajax({
+            type: "post",
+            url: "/Account/ChangePassword",
+            data: { id: userId, oldPass: oldPass, newPass : newPass},
+            dataType: "json",
+            success: function (result) {
+                if (result.success) {
+                    $('#changePasswordModal').modal('hide');
+                } else {
+                    alert(result.message);
+                    document.getElementById('ajaxOldPassword').value = "";
+                    document.getElementById('ajaxNewPassword').value = "";
+                    document.getElementById('ajaxNewPasswordConfirm').value = "";
+                    return;
+                }
+            }
+        });
+    }
+</script>
