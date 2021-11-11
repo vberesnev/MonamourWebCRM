@@ -12,17 +12,15 @@
     <br />
 
     <form asp-controller="Logs" asp-action="Index" method="get">
-        <div class="form-group row pt-4">
-            <div class="3">
-                <input asp-for="@Model.Begin.Value" type="date" class="form-control" name="begin" aria-describedby="Born Date">
-                <input asp-for="@Model.End.Value" type="date" class="form-control" name="end" aria-describedby="Born Date">
+        <div class="form-group row">
+            <div class="col3">
+                Всего @Model.Count
             </div>
-            
-            <div class="col-1">
-                <label mr-3>Показывать</label>
-            </div>
-            <div class="col-1 text-center">
-                <select asp-for="@Model.PageSettings.PageSize" name="pageSize" class="form-control mr-3">
+        </div>
+        <div class="form-group row">
+            <div class="col-2 d-flex">
+                <span class="fa fa-binoculars fa-lg mt-auto mb-auto ml-1 mr-1"></span>
+                <select asp-for="@Model.PageSettings.PageSize" name="pageSize" class="form-control">
                     @foreach (var item in Model.PageSettings.PageSizes)
                     {
                         @if (item.Value == @Model.PageSettings.PageSize.ToString())
@@ -36,12 +34,14 @@
                     }
                 </select>
             </div>
-            <div class="col-3">
-                <input type="text" name="search" class="form-control" value="@Model.PageSettings.Search" />
+
+            <div class="col-6 d-flex">
+                <span class="fa fa-filter fa-lg mt-auto mb-auto mr-1"></span>
+                <input type="text" name="search" class="form-control ml-1" value="@Model.PageSettings.Search" />
             </div>
             <div class="col-2">
-                <select name="userId" class="form-control">
-                    <option value="">Выберите пользователя</option>
+                <select asp-for="@Model.UserId" name="userId" class="form-control">
+                    <option value="">Пользователь</option>
                     @foreach (var item in Model.Users)
                     {
                         @if (item.Id == Convert.ToInt32(Model.UserId))
@@ -56,11 +56,19 @@
                 </select>
             </div>
             <div class="col-2 btn-group text-right" background-color="red">
-                <input type="submit" value="Поиск" class="btn btn-primary mr-3 btn-sm" />
+                <input type="submit" value="Поиск" class="btn btn-primary mr-1 btn-sm" />
                 <a class="btn btn-outline-primary btn-sm" asp-controller="Logs" asp-action="Index">Сбросить</a>
             </div>
         </div>
-    </form>
+        <div class="form-group row">
+            <div class="col-4 d-flex">
+                <span class="fa fa-calendar fa-lg mt-auto mb-auto mr-1"></span>
+                <input asp-for="@Model.Begin" type="date" class="form-control ml-1 mr-2" name="begin" aria-describedby="Born Date">
+                <b style="margin: auto">-</b>
+                <input asp-for="@Model.End" type="date" class="form-control ml-2" name="end" aria-describedby="Born Date">
+            </div>
+        </div>
+</form>
 
     @if (Model.PaginatedList.Any())
     {
@@ -69,6 +77,9 @@
                 <tr>
                     <th>
                         <a asp-action="Index"
+                           asp-route-begin="@Model.Begin"
+                           asp-route-end="@Model.End"
+                           asp-route-userId="@Model.UserId"
                            asp-route-sort=@ViewData["DateSort"]
                            asp-route-page="@Model.PaginatedList.PageIndex"
                            asp-route-search="@Model.PageSettings.Search"
@@ -78,6 +89,9 @@
                     </th>
                     <th>
                         <a asp-action="Index"
+                           asp-route-begin="@Model.Begin"
+                           asp-route-end="@Model.End"
+                           asp-route-userId="@Model.UserId"
                            asp-route-sort=@ViewData["UserSort"]
                            asp-route-page="@Model.PaginatedList.PageIndex"
                            asp-route-search="@Model.PageSettings.Search"
@@ -88,6 +102,8 @@
                     <th>
                         @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Message)
                     </th>
+                    <th>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -95,8 +111,13 @@
                 {
                     <tr>
                         <td width="15%">@item.Date</td>
-                        <td width="15%">@item.User.Name</td>
+                        <td width="10%">@item.User.Name</td>
                         <td width="70%">@item.Message</td>
+                        <td width="5%">
+                            <a asp-controller="Logs" asp-action="Details" asp-route-Id="@item.Id" class="btn btn-primary mx-1">
+                                <span class="fa fa-eye"></span>
+                            </a>
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -109,6 +130,9 @@
     }
 
     <a asp-action="Index"
+       asp-route-begin="@Model.Begin"
+       asp-route-end="@Model.End"
+       asp-route-userId="@Model.UserId"
        asp-route-sort="@Model.PageSettings.Sort"
        asp-route-page="@(Model.PaginatedList.PageIndex - 1)"
        asp-route-search="@Model.PageSettings.Search"
@@ -117,6 +141,9 @@
         <- Назад
     </a>
     <a asp-action="Index"
+       asp-route-begin="@Model.Begin"
+       asp-route-end="@Model.End"
+       asp-route-userId="@Model.UserId"
        asp-route-sort="@Model.PageSettings.Sort"
        asp-route-page="@(Model.PaginatedList.PageIndex + 1)"
        asp-route-search="@Model.PageSettings.Search"

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MonamourWeb.Models
 {
@@ -15,6 +16,20 @@ namespace MonamourWeb.Models
         [Required]
         [DisplayName("Сообщение")]
         public string Message { get; set; }
+
+        [NotMapped]
+        public string ShortMessage
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(Message))
+                    return string.Empty;
+
+                if (Message.Length > 100)
+                    return Message.Substring(0, 20) + "...";
+                return Message;
+            }
+        }
         
         [Required]
         public int UserId { get; set; }

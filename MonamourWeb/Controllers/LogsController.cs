@@ -21,10 +21,13 @@ namespace MonamourWeb.Controllers
         }
 
         [UserRoleFilter]
-        public async Task<IActionResult> Index(DateTime? begin, DateTime? end, int? userId, string sort, string search, int? page, int? pageSize)
+        public async Task<IActionResult> Index(DateTime begin, DateTime end, int? userId, string sort, string search, int? page, int? pageSize)
         {
-            begin = begin.HasValue ? begin.Value.Date : DateTime.Now.Date;
-            end = end.HasValue ? end.Value.Date : DateTime.Now.Date;
+            if (begin == DateTime.MinValue)
+                begin = DateTime.Now.Date;
+
+            if (end == DateTime.MinValue)
+                end = DateTime.Now.Date;
 
             var viewModel = new LogsViewModel();
             viewModel.PageSettings.Sort = sort;
@@ -36,7 +39,10 @@ namespace MonamourWeb.Controllers
             viewModel.Begin = begin;
             viewModel.End = end;
 
-            var logs = Context.Logs.Include(x => x.User).Where(x => x.Date >= begin && x.Date < end.Value.AddDays(1)).AsQueryable();
+            var logs = Context.Logs
+                .Include(x => x.User)
+                .Where(x => x.Date >= begin && x.Date < end.AddDays(1))
+                .AsQueryable();
 
             if (userId != null)
                 logs = logs.Where(x => x.UserId == userId);
@@ -58,6 +64,21 @@ namespace MonamourWeb.Controllers
 
             viewModel.PaginatedList = await PaginatedList<Log>.CreateAsync(logs.AsNoTracking(), page ?? 1, pageSize ?? 50);
             return View(viewModel);
+        }
+
+        public IActionResult Details(int? id)
+        {
+            if (id == null || id == 0)
+                return NotFound();
+
+            var log = Context.Logs
+                .Include(x => x.User)
+                .FirstOrDefault(x => x.Id == id);
+
+            if (log == null)
+                return NotFound();
+
+            return View(log);
         }
     }
 }
