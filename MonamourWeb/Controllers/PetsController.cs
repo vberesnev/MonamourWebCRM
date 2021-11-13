@@ -48,6 +48,8 @@ namespace MonamourWeb.Controllers
                 pets = pets.Where(x => x.Tags.Any(petTag => petTag.Id == tagId));
             }
 
+            viewModel.TotalCount = pets.Count();
+
             ViewData["NameSort"] = sort == "name" ? "name_desc" : "name";
             ViewData["BreedSort"] = sort == "breed" ? "breed_desc" : "breed";
 

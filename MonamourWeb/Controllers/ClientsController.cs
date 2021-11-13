@@ -30,7 +30,10 @@ namespace MonamourWeb.Controllers
             viewModel.Tags = Context.ClientTags;
             viewModel.TagId = tagId;
 
-            var clients = Context.Clients.Include(x => x.Pets).Include(x => x.Tags).AsQueryable();
+            var clients = Context.Clients
+                .Include(x => x.Pets)
+                .Include(x => x.Tags)
+                .AsQueryable();
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -44,6 +47,8 @@ namespace MonamourWeb.Controllers
             {
                 clients = clients.Where(x => x.Tags.Any(clientTag => clientTag.Id == tagId));
             }
+
+            viewModel.TotalCount = clients.Count();
 
             ViewData["NameSort"] = sort == "name" ? "name_desc" : "name";
             ViewData["BonusSort"] = sort == "bonus" ? "bonus_desc" : "bonus";

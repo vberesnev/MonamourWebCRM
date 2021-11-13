@@ -45,6 +45,8 @@ namespace MonamourWeb.Controllers
                 procedures = procedures.Where(x => x.AnimalId == animalId);
             }
 
+            viewModel.TotalCount = procedures.Count();
+
             ViewData["TitleSort"] = sort == "title" ? "title_desc" : "title";
             ViewData["AnimalSort"] = sort == "animal" ? "animal_desc" : "animal";
             ViewData["CostSort"] = sort == "cost" ? "cost_desc" : "cost";

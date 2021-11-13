@@ -57,6 +57,11 @@
                 <a class="btn btn-outline-primary btn-sm" asp-controller="Procedures" asp-action="All">Сбросить</a>
             </div>
         </div>
+        <div class="form-group row pt-4">
+            <div class="col text-right">
+                <h6>Всего: @Model.TotalCount</h6>
+            </div>
+        </div>
     </form>
 
     @if (Model.PaginatedList.Any())

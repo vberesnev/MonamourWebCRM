@@ -49,6 +49,8 @@ namespace MonamourWeb.Controllers
             
             if (!string.IsNullOrEmpty(search))
                 logs = logs.Where(s => s.Message.ToLower().Contains(search.ToLower()));
+
+            viewModel.TotalCount = logs.Count();
             
             ViewData["DateSort"] = sort == "date" ? "date_desc" : "date";
             ViewData["UserSort"] = sort == "user" ? "user_desc" : "user";

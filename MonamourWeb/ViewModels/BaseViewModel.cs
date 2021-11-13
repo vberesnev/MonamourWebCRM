@@ -8,7 +8,7 @@ namespace MonamourWeb.ViewModels
     {
         public PageSettings PageSettings { get; set; }
         public PaginatedList<T> PaginatedList { get; set; }
-        public int Count => PaginatedList.Count;
+        public int TotalCount { get; set; }
     }
 
 

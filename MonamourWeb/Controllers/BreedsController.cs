@@ -36,6 +36,7 @@ namespace MonamourWeb.Controllers
                                            || s.Animal.Title.ToLower().Contains(search));
             }
             
+            viewModel.TotalCount = breeds.Count();
             ViewData["IdSort"] = sort == "id" ? "id_desc" : "id";
             ViewData["TitleSort"] = sort == "title" ? "title_desc" : "title";
             ViewData["AnimalSort"] = sort == "animal" ? "animal_desc" : "animal";
