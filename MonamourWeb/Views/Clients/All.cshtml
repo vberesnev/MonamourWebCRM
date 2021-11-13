@@ -73,6 +73,7 @@
                         <a asp-action="All"
                            asp-route-sort=@ViewData["NameSort"]
                            asp-route-page="@Model.PaginatedList.PageIndex"
+                           asp-route-tagId="@Model.TagId"
                            asp-route-search="@Model.PageSettings.Search"
                            asp-route-pageSize="@Model.PageSettings.PageSize">
                             @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Name)
@@ -91,6 +92,7 @@
                         <a asp-action="All"
                            asp-route-sort=@ViewData["BonusSort"]
                            asp-route-page="@Model.PaginatedList.PageIndex"
+                           asp-route-tagId="@Model.TagId"
                            asp-route-search="@Model.PageSettings.Search"
                            asp-route-pageSize="@Model.PageSettings.PageSize">
                             @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Bonus)
@@ -165,6 +167,7 @@
     <a asp-action="All"
        asp-route-sort="@Model.PageSettings.Sort"
        asp-route-page="@(Model.PaginatedList.PageIndex - 1)"
+       asp-route-tagId="@Model.TagId"
        asp-route-search="@Model.PageSettings.Search"
        asp-route-pageSize="@Model.PageSettings.PageSize"
        class="btn btn-default @prevDisabled @hidden @hidden">
@@ -173,6 +176,7 @@
     <a asp-action="All"
        asp-route-sort="@Model.PageSettings.Sort"
        asp-route-page="@(Model.PaginatedList.PageIndex + 1)"
+       asp-route-tagId="@Model.TagId"
        asp-route-search="@Model.PageSettings.Search"
        asp-route-pageSize="@Model.PageSettings.PageSize"
        class="btn btn-default @nextDisabled @hidden @hidden">
