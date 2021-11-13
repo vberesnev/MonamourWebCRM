@@ -111,13 +111,15 @@ namespace MonamourWeb.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity),
                 authProperties);
-
+            await LogService.AddLoginLogAsync(user.Name, user.Id);
             return RedirectToAction("Index", "Visits");
         }
 
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            var user = await Context.Users.FindAsync(UserId);
+            await LogService.AddLogoutLogAsync(user.Name, user.Id);
             return RedirectToAction("Login", "Account");
         }
 
