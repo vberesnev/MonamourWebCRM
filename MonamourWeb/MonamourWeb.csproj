@@ -27,7 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\Convertors\" />
     <Folder Include="Services\Pagination\" />
   </ItemGroup>
 
