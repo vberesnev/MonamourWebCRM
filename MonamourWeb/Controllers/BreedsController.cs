@@ -19,13 +19,15 @@ namespace MonamourWeb.Controllers
         {
         }
 
-        public async Task<IActionResult> All(string sort, string search, int? page, int? pageSize)
+        public async Task<IActionResult> All(string sort, string search, int? animalId, int? page, int? pageSize)
         {
             var viewModel = new BreedsAllViewModel();
             viewModel.PageSettings.Sort = sort;
             viewModel.PageSettings.Search = search;
             viewModel.PageSettings.PageSize = pageSize ?? 25;
             viewModel.PageSettings.PageSizes = PageSize.GetSelectListItems(pageSize);
+            viewModel.Animals = Context.Animals;
+            viewModel.AnimalId = animalId;
 
             var breeds = Context.Breeds.Include(x => x.Animal).AsQueryable();
             
@@ -35,8 +37,14 @@ namespace MonamourWeb.Controllers
                 breeds = breeds.Where(s => s.Title.ToLower().Contains(search)
                                            || s.Animal.Title.ToLower().Contains(search));
             }
+
+            if (animalId != null)
+            {
+                breeds = breeds.Where(x => x.AnimalId == animalId);
+            }
             
             viewModel.TotalCount = breeds.Count();
+
             ViewData["IdSort"] = sort == "id" ? "id_desc" : "id";
             ViewData["TitleSort"] = sort == "title" ? "title_desc" : "title";
             ViewData["AnimalSort"] = sort == "animal" ? "animal_desc" : "animal";

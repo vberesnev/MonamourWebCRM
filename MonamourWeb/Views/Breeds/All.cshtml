@@ -33,11 +33,27 @@
                     }
                 </select>
             </div>
-            <div class="col-7 d-flex">
+            <div class="col-4 d-flex">
                 <span class="fa fa-filter fa-lg mt-auto mb-auto mr-1"></span>
                 <input type="text" name="search" class="form-control ml-1" value="@Model.PageSettings.Search" />
             </div>
-            <div class="col-3 btn-group text-right" background-color="red">
+            <div class="col-3">
+                <select name="animalId" class="form-control">
+                    <option value="">Выберите животное</option>
+                    @foreach (var item in Model.Animals)
+                    {
+                        @if (item.Id == Convert.ToInt32(Model.AnimalId))
+                        {
+                            <option value="@item.Id" selected>@item.Title</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Id">@item.Title</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-3 btn-group text-right">
                 <input type="submit" value="Поиск" class="btn btn-primary mr-3 btn-sm" />
                 <a class="btn btn-outline-primary btn-sm" asp-controller="Breeds" asp-action="All">Сбросить</a>
             </div>
@@ -58,6 +74,7 @@
                         <a asp-action="All" 
                            asp-route-sort=@ViewData["TitleSort"]
                            asp-route-page="@Model.PaginatedList.PageIndex"
+                           asp-route-animalId="@Model.AnimalId"
                            asp-route-search="@Model.PageSettings.Search"
                            asp-route-pageSize="@Model.PageSettings.PageSize">
                             @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Title)
@@ -67,6 +84,7 @@
                         <a asp-action="All"
                            asp-route-sort=@ViewData["AnimalSort"]
                            asp-route-page="@Model.PaginatedList.PageIndex"
+                           asp-route-animalId="@Model.AnimalId"
                            asp-route-search="@Model.PageSettings.Search"
                            asp-route-pageSize="@Model.PageSettings.PageSize">
                             @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Animal)
@@ -112,6 +130,7 @@
     <a asp-action="All"
        asp-route-sort="@Model.PageSettings.Sort"
        asp-route-page="@(Model.PaginatedList.PageIndex - 1)"
+       asp-route-animalId="@Model.AnimalId"
        asp-route-search="@Model.PageSettings.Search"
        asp-route-pageSize="@Model.PageSettings.PageSize"
        class="btn btn-default @prevDisabled @hidden">
@@ -120,6 +139,7 @@
     <a asp-action="All"
        asp-route-sort="@Model.PageSettings.Sort"
        asp-route-page="@(Model.PaginatedList.PageIndex + 1)"
+       asp-route-animalId="@Model.AnimalId"
        asp-route-search="@Model.PageSettings.Search"
        asp-route-pageSize="@Model.PageSettings.PageSize"
        class="btn btn-default @nextDisabled @hidden">
