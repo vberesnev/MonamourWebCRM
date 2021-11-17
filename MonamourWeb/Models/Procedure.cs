@@ -24,7 +24,7 @@ namespace MonamourWeb.Models
         [DisplayName("Инфо")]
         public string Info { get; set; }
 
-        [DisplayName("Ориентировочное время")]
+        [DisplayName("Ориентировочное время (мин)")]
         public int? ApproximateTime { get; set; }
 
         public override string ToString()
