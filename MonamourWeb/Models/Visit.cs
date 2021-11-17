@@ -21,8 +21,14 @@ namespace MonamourWeb.Models
         [DisplayName("Дата")]
         public DateTime Date { get; set; }
 
+        [NotMapped]
+        public string DateString => Date.ToString("m");
+
         [DisplayName("Время")]
         public DateTime TimeBegin { get; set; }
+        
+        [NotMapped]
+        public string TimeBeginString => TimeBegin.ToString("t");
         
         [Required(ErrorMessage = "Посещению должен быть назначен питомец")]
         public int PetId { get; set; }

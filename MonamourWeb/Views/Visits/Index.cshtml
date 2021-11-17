@@ -1,7 +1,362 @@
-﻿@{
+﻿@model MonamourWeb.ViewModels.VisitListViewModel
+@{
     ViewData["Title"] = "Посещения";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Главная страница MonamourWeb</h1>
+<div class="container p-3">
+<div class="row pt-4">
+    <div class="col-6">
+        @if (Model.Begin == Model.End)
+        {
+            <h4 class="text-black-50 pl-3">Посещения за @Model.BeginString</h4>
+        }
+        else
+        {
+            <h4 class="text-black-50 pl-3">Посещения c @Model.BeginString по @Model.EndString </h4>
+        }
+    </div>
+    <div class="col-6 text-right">
+        <a class="btn btn-success" asp-area="" asp-controller="Visits" asp-action="Create">Добавить</a>
+    </div>
 </div>
+<br />
+
+<form asp-controller="Visits" asp-action="Index" method="get">
+    <div class="form-group row">
+        <div class="col-2 d-flex">
+            <span class="fa fa-binoculars fa-lg mt-auto mb-auto mr-1"></span>
+            <select asp-for="@Model.PageSettings.PageSize" name="pageSize" class="form-control ml-1">
+                @foreach (var item in Model.PageSettings.PageSizes)
+                {
+                    @if (item.Value == @Model.PageSettings.PageSize.ToString())
+                    {
+                        <option value="@item.Value" selected>@item.Text</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-5 d-flex">
+            <span class="fa fa-filter fa-lg mt-auto mb-auto mr-1"></span>
+            <input type="text" name="search" class="form-control ml-1" value="@Model.PageSettings.Search" />
+        </div>
+        <div class="col-3">
+            <select asp-for="@Model.UserId" name="userId" class="form-control">
+                <option value="">Выберите мастера</option>
+                @foreach (var item in Model.Users)
+                {
+                    @if (item.Id == Convert.ToInt32(Model.UserId))
+                    {
+                        <option value="@item.Id" selected>@item.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-2 btn-group text-right">
+            <input type="submit" value="Поиск" class="btn btn-primary mr-3 btn-sm" />
+            <a class="btn btn-outline-primary btn-sm" asp-controller="Visits" asp-action="Index">Сбросить</a>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-7 d-flex justify-content-center align-items-center">
+            <span class="fa fa-calendar fa-lg mr-1"></span>
+            @if (Model.Begin == Model.End)
+            {
+                <button class="btn btn-primary mx-1" id="leftButton" onclick="decreaseDate()">
+                    <span class="fa fa-arrow-left"></span>
+                </button>
+                <input asp-for="@Model.Begin" type="date" class="form-control ml-1 mr-1" name="begin" id="beginDate" onchange="syncDates()">
+                <button class="btn btn-primary mx-1" id="rightButton" onclick="increaseDate()">
+                    <span class="fa fa-arrow-right"></span>
+                </button>
+                <b id="dateSeparator" style="display: none">-</b>
+                <input asp-for="@Model.End" type="date" class="form-control ml-1" name="end" id="endDate" style="display: none">
+                <div class="form-check ml-3">
+                    <input class="form-check-input" type="checkbox" id="datePeriodCheckbox" onchange="showHideElements(this.checked)">
+                    <h6><label class="form-check-label" for="datePeriodCheckbox">Период</label></h6>
+                </div>
+            }
+            else
+            {
+                <button class="btn btn-primary mx-1" id="leftButton" onclick="decreaseDate()" style="display: none">
+                    <span class="fa fa-arrow-left"></span>
+                </button>
+                <input asp-for="@Model.Begin" type="date" class="form-control ml-1 mr-1" name="begin" id="beginDate" onchange="syncDates()">
+                <button class="btn btn-primary mx-1" id="rightButton" onclick="increaseDate()"  style="display: none">
+                    <span class="fa fa-arrow-right"></span>
+                </button>
+                <b id="dateSeparator">-</b>
+                <input asp-for="@Model.End" type="date" class="form-control ml-1" name="end" id="endDate">
+                <div class="form-check ml-3">
+                    <input class="form-check-input" type="checkbox" id="datePeriodCheckbox" onchange="showHideElements(this.checked)" checked>
+                    <h6><label class="form-check-label" for="datePeriodCheckbox">Период</label></h6>
+                </div>
+            }
+
+        </div>
+        <div class="col-3 d-flex justify-content-center align-items-center">
+            <select asp-for="@Model.StatusId" name="statusId" class="form-control">
+                <option value="">Выберите статус</option>
+                @foreach (var item in Model.Statuses)
+                {
+                    @if (item.Id == Convert.ToInt32(Model.StatusId))
+                    {
+                        <option value="@item.Id" selected>@item.Status</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Id">@item.Status</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-2 text-right">
+            <h6>Всего посещений: @Model.TotalCount</h6>
+            <h6>Общая сумма: @Model.TotalSum</h6>
+        </div>
+    </div>
+</form>
+
+@if (Model.PaginatedList.Any())
+{
+    <table class="table table-bordered table-striped text-center" style="width: 100%">
+        <thead>
+        <tr>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sort=@ViewData["StatusSort"]
+                   asp-route-page="@Model.PaginatedList.PageIndex"
+                   asp-route-begin="@Model.Begin.ToString("yyyy-MM-dd")"
+                   asp-route-end="@Model.End.ToString("yyyy-MM-dd")"
+                   asp-route-userId="@Model.UserId"
+                   asp-route-statusId="@Model.StatusId"
+                   asp-route-search="@Model.PageSettings.Search"
+                   asp-route-pageSize="@Model.PageSettings.PageSize">
+                    @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Status.Status)
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sort=@ViewData["DateSort"]
+                   asp-route-page="@Model.PaginatedList.PageIndex"
+                   asp-route-begin="@Model.Begin.ToString("yyyy-MM-dd")"
+                   asp-route-end="@Model.End.ToString("yyyy-MM-dd")"
+                   asp-route-userId="@Model.UserId"
+                   asp-route-statusId="@Model.StatusId"
+                   asp-route-search="@Model.PageSettings.Search"
+                   asp-route-pageSize="@Model.PageSettings.PageSize">
+                    @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Date)
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sort=@ViewData["TimeSort"]
+                   asp-route-page="@Model.PaginatedList.PageIndex"
+                   asp-route-begin="@Model.Begin.ToString("yyyy-MM-dd")"
+                   asp-route-end="@Model.End.ToString("yyyy-MM-dd")"
+                   asp-route-userId="@Model.UserId"
+                   asp-route-statusId="@Model.StatusId"
+                   asp-route-search="@Model.PageSettings.Search"
+                   asp-route-pageSize="@Model.PageSettings.PageSize">
+                    @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.TimeBegin)
+                </a>
+            </th>
+            <th>
+                <a>@Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Pet.Name)</a>
+            </th>
+            <th>
+                <a>@Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Pet.Breed.Title)</a>
+            </th>
+            <th>
+                <a>@Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Pet.Clients)</a>
+            </th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sort=@ViewData["MasterSort"]
+                   asp-route-page="@Model.PaginatedList.PageIndex"
+                   asp-route-begin="@Model.Begin.ToString("yyyy-MM-dd")"
+                   asp-route-end="@Model.End.ToString("yyyy-MM-dd")"
+                   asp-route-userId="@Model.UserId"
+                   asp-route-statusId="@Model.StatusId"
+                   asp-route-search="@Model.PageSettings.Search"
+                   asp-route-pageSize="@Model.PageSettings.PageSize">
+                    @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.User.Name)
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sort=@ViewData["SumSort"]
+                   asp-route-page="@Model.PaginatedList.PageIndex"
+                   asp-route-begin="@Model.Begin.ToString("yyyy-MM-dd")"
+                   asp-route-end="@Model.End.ToString("yyyy-MM-dd")"
+                   asp-route-userId="@Model.UserId"
+                   asp-route-statusId="@Model.StatusId"
+                   asp-route-search="@Model.PageSettings.Search"
+                   asp-route-pageSize="@Model.PageSettings.PageSize">
+                    @Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Sum)
+                </a>
+            </th>
+            <th>
+                <a>@Html.DisplayNameFor(model => model.PaginatedList.FirstItem.Payments.First().PaymentType.Type)</a>
+            </th>
+            <th>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model.PaginatedList)
+        {
+            <tr>
+                <td width="5%">
+                    <a asp-controller="Visits" asp-action="Details" asp-route-Id="@item.Id">@item.Status.Status</a>
+                </td>
+                <td width="5%">
+                    @item.DateString
+                </td>
+                <td width="5%">
+                    @item.TimeBeginString
+                </td>
+                <td width="25%">
+                    <a asp-controller="Pets" asp-action="Details" asp-route-Id="@item.Pet.Id">@item.Pet.Name</a>
+                    @foreach (var tag in item.Pet.Tags)
+                    {
+                        <a style="background-color: @tag.Color; color: white; padding: 3px; width: 30px; text-align: center; text-decoration: none; display: inline-block; border-radius: 4px"
+                           asp-controller="PetTags" asp-action="Details" asp-route-Id="@tag.Id">
+                            @tag.ShortTitle
+                        </a>
+                    }
+                </td>
+                <td width="15%">
+                    @item.Pet.Breed.Title
+                </td>
+                <td width="25%">
+                    @foreach (var client in item.Pet.Clients)
+                    {
+                        <a asp-controller="Clients" asp-action="Details" asp-route-Id="@client.Id">@client.Name</a><br />
+                        @foreach (var tag in client.Tags)
+                        {
+                            <a style="background-color: @tag.Color; color: white; padding: 3px; width: 30px; text-align: center; text-decoration: none; display: inline-block; border-radius: 4px"
+                               asp-controller="ClientTags" asp-action="Details" asp-route-Id="@tag.Id">
+                                @tag.ShortTitle
+                            </a>
+                        }
+                        <br />
+                    }
+                </td>
+                <td width="5%">
+                    @item.User.Name
+                </td>
+                <td width="5%">
+                    @item.Sum
+                </td>
+                <td width="5%">
+                    @foreach (var status in item.Payments)
+                    {
+                        @status.PaymentType.Type<br />
+                    }
+                </td>
+                <td width="5%">
+                    <div class="w-100 btn-group" role="group">
+                        <a asp-controller="Visits" asp-action="Update" asp-route-Id="@item.Id" class="btn btn-primary mx-1">
+                            <span class="fa fa-pen"></span>
+                        </a>
+                        @if (Context.User.IsInRole("Admin"))
+                        {
+                            <a asp-controller="Visits" asp-action="Delete" asp-route-Id="@item.Id" class="btn btn-danger mx-1">
+                                <span class="fa fa-trash"></span>
+                            </a>
+                        }
+                    </div>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@{
+    var prevDisabled = !Model.PaginatedList.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.PaginatedList.HasNextPage ? "disabled" : "";
+    var hidden = Model.PaginatedList.Count == 0 ? "d-none" : "";
+}
+
+<a asp-action="Index"
+   asp-route-sort="@Model.PageSettings.Sort"
+   asp-route-page="@(Model.PaginatedList.PageIndex - 1)"
+   asp-route-begin="@Model.Begin.ToString("yyyy-MM-dd")"
+   asp-route-end="@Model.End.ToString("yyyy-MM-dd")"
+   asp-route-userId="@Model.UserId"
+   asp-route-statusId="@Model.StatusId"
+   asp-route-search="@Model.PageSettings.Search"
+   asp-route-pageSize="@Model.PageSettings.PageSize"
+   class="btn btn-default @prevDisabled @hidden @hidden">
+    <- Назад
+</a>
+<a asp-action="Index"
+   asp-route-sort="@Model.PageSettings.Sort"
+   asp-route-page="@(Model.PaginatedList.PageIndex + 1)"
+   asp-route-begin="@Model.Begin.ToString("yyyy-MM-dd")"
+   asp-route-end="@Model.End.ToString("yyyy-MM-dd")"
+   asp-route-userId="@Model.UserId"
+   asp-route-statusId="@Model.StatusId"
+   asp-route-search="@Model.PageSettings.Search"
+   asp-route-pageSize="@Model.PageSettings.PageSize"
+   class="btn btn-default @nextDisabled @hidden @hidden">
+    Вперёд ->
+</a>
+</div>
+
+<script>
+
+    function showHideElements(checked) {
+        if (checked) {
+            document.getElementById("leftButton").style.display = "none";
+            document.getElementById("rightButton").style.display = "none";
+            document.getElementById("dateSeparator").style.display = "inline";
+            document.getElementById("endDate").style.display = "inline";
+        } else {
+            document.getElementById("leftButton").style.display = "inline";
+            document.getElementById("rightButton").style.display = "inline";
+            document.getElementById("dateSeparator").style.display = "none";
+            document.getElementById("endDate").style.display = "none";
+        }
+
+        document.getElementById("endDate").value = document.getElementById("beginDate").value;
+    }
+
+
+    function syncDates() {
+        var checked = document.getElementById("datePeriodCheckbox").checked;
+        if (checked)
+            return;
+        document.getElementById("endDate").value = document.getElementById("beginDate").value;
+    }
+
+    function decreaseDate() {
+        var currentDate = new Date(document.getElementById("beginDate").value);
+        var newDate = currentDate.addDays(-1);
+        document.getElementById("beginDate").valueAsDate = newDate;
+        syncDates();
+    }
+
+    function increaseDate() {
+        var currentDate = new Date(document.getElementById("beginDate").value);
+        var newDate = currentDate.addDays(1);
+        document.getElementById("beginDate").valueAsDate = newDate;
+        syncDates();
+    }
+
+    Date.prototype.addDays = function(days) {
+        var date = new Date(this.valueOf());
+        date.setDate(date.getDate() + days);
+        return date;
+    }
+</script>
+
