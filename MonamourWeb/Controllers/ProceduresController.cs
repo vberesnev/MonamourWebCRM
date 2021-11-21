@@ -95,6 +95,46 @@ namespace MonamourWeb.Controllers
             return View(procedureViewModel);
         }
 
+        [HttpPost]
+        public async Task<ActionResult> CreateQuick(string title, int animalId, int cost, int time)
+        {
+            var procedure = new Procedure()
+            {
+                Title = title,
+                AnimalId = animalId,
+                Cost = cost,
+                ApproximateTime = time
+            };
+
+            procedure.Animal = await Context.Animals.FindAsync(animalId);
+                
+            Context.Procedures.Add(procedure);
+            await Context.SaveChangesAsync();
+            await LogService.AddCreationLogAsync<Procedure>(procedure, UserId);
+            return Json(true);
+        }
+
+        [HttpPost]
+        public JsonResult SearchProcedure([FromBody] string search, int breedId)
+        {
+            var animalId = Context.Breeds.Find(breedId).Id;
+            
+            IQueryable<Procedure> procedures;
+            if (string.IsNullOrEmpty(search))
+                procedures = Context.Procedures
+                    .Where(x => x.AnimalId == animalId)
+                    .Take(10);
+            else
+            {
+                search = search.ToLower(); 
+                procedures = Context.Procedures
+                    .Where(x => x.Title.ToLower().Contains(search) && x.AnimalId == breedId)
+                    .Take(15);
+            }
+
+            return Json(procedures); 
+        }
+
         [UserRoleFilter]
         [HttpGet]
         public IActionResult Update(int? id)

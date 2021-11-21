@@ -111,9 +111,36 @@ namespace MonamourWeb.Controllers
             viewModel.Visit.TimeBegin = DateTime.Now;
             viewModel.Masters = users;
             viewModel.Visit.User = users.FirstOrDefault(x => x.Id == UserId) ?? users.First();
-            viewModel.Visit.Pet = new Pet();
+            viewModel.Visit.Pet = new Pet(){Name = "Не выбрано"};
+            viewModel.Visit.Pet.Breed = new Breed() {Id = 0, Title = "Не выбрано"};
+            viewModel.Animals = Context.Animals;
 
             return View(viewModel);
         }
+
+        // [HttpPost]
+        // [ValidateAntiForgeryToken]
+        // public async Task<IActionResult> Create(VisitViewModel visitViewModel)
+        // {
+        //     if (ModelState.IsValid)
+        //     {
+        //         var pets = Context.Pets
+        //             .Include(x => x.Breed)
+        //             .Where(x => clientPets.Contains(x.Id));
+        //         foreach (var pet in pets)
+        //             visitViewModel.Client.Pets.Add(pet); 
+        //
+        //         var tags = Context.ClientTags.Where(x => clientTags.Contains(x.Id));
+        //         foreach (var tag in tags)
+        //             visitViewModel.Client.Tags.Add(tag);
+        //         visitViewModel.Client.Name = visitViewModel.Client.Name?.Trim();
+        //
+        //         Context.Clients.Add(visitViewModel.Client);
+        //         await Context.SaveChangesAsync();
+        //         await LogService.AddCreationLogAsync<Client>(visitViewModel.Client, UserId);
+        //         return RedirectToAction("All");
+        //     }
+        //     return View(visitViewModel);
+        // }
     }
 }
