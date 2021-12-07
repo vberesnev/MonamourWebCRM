@@ -118,41 +118,6 @@ namespace MonamourWeb.Controllers
             return Json(true);
         }
 
-        [HttpPost]
-        public JsonResult SearchBreed([FromBody] string search)
-        {
-            IQueryable<Breed> breeds;
-            if (string.IsNullOrEmpty(search))
-            {
-                breeds = Context.Breeds.Take(10);
-            }
-            else
-            {
-                search = search.ToLower(); 
-                breeds = Context.Breeds
-                    .Where(x => x.Title.ToLower().Contains(search))
-                    .Take(10); 
-            }
-            return Json(breeds); 
-        }
-
-        [HttpPost]
-        public JsonResult SearchClient([FromBody] string search)
-        {
-            IQueryable<Client> clients;
-            if (string.IsNullOrEmpty(search))
-                clients = Context.Clients.Take(10);
-            else
-            {
-                search = search.ToLower(); 
-                clients = Context.Clients
-                    .Where(x => x.Name.ToLower().Contains(search) || x.Phone.Contains(search))
-                    .Take(50);
-            }
-
-            return Json(clients); 
-        }
-
         public IActionResult Details(int? id)
         {
             if (id == null || id == 0)

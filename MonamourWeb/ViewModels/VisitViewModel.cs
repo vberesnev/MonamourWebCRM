@@ -9,10 +9,12 @@ namespace MonamourWeb.ViewModels
         public Visit Visit { get; set; }
         public IEnumerable<User> Masters { get; set; }
         public IEnumerable<Animal> Animals { get; set; }
+        public ProceduresForVisitCard ProceduresForVisitCard { get; set; }
 
         public VisitViewModel()
         {
             Visit = new Visit();
+            ProceduresForVisitCard = new ProceduresForVisitCard();
         }
     }
 }

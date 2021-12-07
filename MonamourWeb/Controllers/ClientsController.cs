@@ -136,38 +136,6 @@ namespace MonamourWeb.Controllers
             return Update(clientViewModel.Client.Id);
         }
 
-        [HttpPost]
-        public JsonResult SearchPet([FromBody] string search)
-        {
-            IQueryable<Pet> pets;
-            if (string.IsNullOrEmpty(search))
-                pets = Context.Pets.Take(10);
-            else
-            {
-                search = search.ToLower();
-                pets = Context.Pets.Include(x => x.Breed)
-                    .Where(x => x.Name.ToLower().Contains(search) || x.Breed.Title.ToLower().Contains(search))
-                    .Where(x => x.Alive);
-            }
-            return Json(pets); 
-        }
-
-        [HttpPost]
-        public JsonResult CheckPhone([FromBody] string phoneNumber)
-        {
-            var phones = phoneNumber.Split(" ");
-
-            var clients = new List<Client>();
-
-            foreach (var phone in phones)
-            {
-                if (string.IsNullOrEmpty(phone))
-                    continue;
-                clients.AddRange(Context.Clients.Where(x => x.Phone.Contains(phone)));
-            }
-            return Json(clients);
-        }
-        
         [UserRoleFilter]
         [HttpGet]
         public IActionResult Delete(int? id)

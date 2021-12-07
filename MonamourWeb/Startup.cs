@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
@@ -14,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using MonamourWeb.Models;
 using MonamourWeb.Services.Encoding;
 using MonamourWeb.Services.Logs;
+using Newtonsoft.Json;
 
 namespace MonamourWeb
 {
@@ -30,27 +32,27 @@ namespace MonamourWeb
         public void ConfigureServices(IServiceCollection services)
         {
             
-            services.AddControllersWithViews();
+            services.AddControllersWithViews()
+                    .AddNewtonsoftJson(options =>
+                        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
             
-            services.AddDbContext<MonamourDataBaseContext>(opt =>
-                    opt.UseNpgsql(Configuration.GetConnectionString("MonamourDBConnection")));
+            services.AddDbContext<MonamourDataBaseContext>(options =>
+                    options.UseNpgsql(Configuration.GetConnectionString("MonamourDBConnection")));
             
             services.AddTransient<IEncodingService, Md5Encoder>();
             
             services.AddTransient<ILogService, LogService>();
             
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options =>
-                    {
-                        options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
-                        options.LogoutPath =new Microsoft.AspNetCore.Http.PathString("/Account/Logout");
-                    }
-                );
+                    .AddCookie(options =>
+                        {
+                            options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
+                            options.LogoutPath =new Microsoft.AspNetCore.Http.PathString("/Account/Logout");
+                        }
+                    );
 
             services.AddSession(options =>
-            {
-                options.IdleTimeout = TimeSpan.FromSeconds(10);
-            });
+                options.IdleTimeout = TimeSpan.FromSeconds(10));
 
         }
 

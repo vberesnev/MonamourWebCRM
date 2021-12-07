@@ -114,27 +114,6 @@ namespace MonamourWeb.Controllers
             return Json(true);
         }
 
-        [HttpPost]
-        public JsonResult SearchProcedure([FromBody] string search, int breedId)
-        {
-            var animalId = Context.Breeds.Find(breedId).Id;
-            
-            IQueryable<Procedure> procedures;
-            if (string.IsNullOrEmpty(search))
-                procedures = Context.Procedures
-                    .Where(x => x.AnimalId == animalId)
-                    .Take(10);
-            else
-            {
-                search = search.ToLower(); 
-                procedures = Context.Procedures
-                    .Where(x => x.Title.ToLower().Contains(search) && x.AnimalId == breedId)
-                    .Take(15);
-            }
-
-            return Json(procedures); 
-        }
-
         [UserRoleFilter]
         [HttpGet]
         public IActionResult Update(int? id)

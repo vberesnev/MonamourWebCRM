@@ -117,8 +117,7 @@
                     <td width="10%">
                         @foreach (var tag in item.Tags)
                         {
-                            <a style="background-color: @tag.Color; color: white; padding: 3px; width: 30px; text-align: center; text-decoration: none; display: inline-block; border-radius: 4px"
-                               asp-controller="PetTags" asp-action="Details" asp-route-Id="@tag.Id">
+                            <a class="tag-with-letter" style="background: @tag.Color" asp-controller="PetTags" asp-action="Details" asp-route-Id="@tag.Id">
                                 @tag.ShortTitle
                             </a>
                         }

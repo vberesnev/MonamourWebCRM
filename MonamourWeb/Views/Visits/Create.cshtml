@@ -1,242 +1,185 @@
 ﻿@model MonamourWeb.ViewModels.VisitViewModel
+
 @{
     ViewData["Title"] = "Добавить посещение";
 }
 <form method="post" asp-controller="Visits" asp-action="Create" id="createForm">
-<div class="border p-3">
-<div asp-validation-summary="ModelOnly" class="text-danger"></div>
-<div class="form-group row">
-    <h4 class="text-black-50 pl-3">Добавить посещение</h4>
-</div>
+    <div class="border p-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group row">
+            <h4 class="text-black-50 pl-3">Добавить посещение</h4>
+        </div>
 
+
+        <div class="form-group row">
+            <div class="col-4">
+                <label asp-for="@Model.Visit.Date" class="col-form-label"></label>
+                <div>
+                    <input type="date" asp-for="@Model.Visit.Date" class="form-control" />
+                    <span asp-validation-for="@Model.Visit.Date" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-4">
+                <label asp-for="@Model.Visit.TimeBegin" class="col-form-label"></label>
+                <div class="d-flex">
+                    <select asp-for="@Model.Visit.TimeBegin.Hour" name="hour" class="form-control">
+                        @for (var i = 0; i < 24; i++)
+                        {
+                            @if (i == @Model.Visit.TimeBegin.Hour)
+                            {
+                                <option value="@i" selected>@i</option>
+                            }
+                            else
+                            {
+                                <option value="@i">@i</option>
+                            }
+                        }
+                    </select>
+                    <label class="col-form-label mt-auto mb-auto ml-1 mr-1">:</label>
+                    <select asp-for="@Model.Visit.TimeBegin.Minute" name="minute" class="form-control ml-1">
+                        @for (var i = 0; i < 60; i += 5)
+                        {
+                            @if (i == 0)
+                            {
+                                <option value="@i" selected>00</option>
+                            }
+                            else if (i == 5)
+                            {
+                                <option value="@i">05</option>
+                            }
+                            else
+                            {
+                                <option value="@i">@i</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="col-4">
+                <label asp-for="@Model.Visit.User" class="col-form-label"></label>
+                <div>
+                    <select asp-for="@Model.Visit.UserId" name="userId" class="form-control">
+                        @foreach (var item in Model.Masters)
+                        {
+                            @if (item == @Model.Visit.User)
+                            {
+                                <option value="@item.Id" selected>@item.Name</option>
+                            }
+                            else
+                            {
+                                <option value="@item.Id">@item.Name</option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="@Model.Visit.Date" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="form-group row">
+            <div class="col-4">
+                <label asp-for="@Model.Visit.Pet" class="col-form-label"></label>
+                <div class="d-flex">
+                    <div>
+                        <input asp-for="@Model.Visit.PetId" hidden id="petId">
+                        <input asp-for="@Model.Visit.Pet.Name" class="form-control" type="text" id="petName" readonly>
+                        <span asp-validation-for="@Model.Visit.PetId" class="text-danger"></span>
+                    </div>
+                    <button type="button" class="btn btn-success ml-1" data-toggle="modal" data-target="#findPetModal">
+                        <span class="fa fa-plus fa-lg mt-auto mb-auto mr-1"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="col-4">
+                <label asp-for="@Model.Visit.Pet.Breed"  class="col-form-label"></label>
+                <div>
+                    <input asp-for="@Model.Visit.Pet.BreedId" hidden id="breedId">
+                    <input asp-for="@Model.Visit.Pet.Breed.Title" class="form-control" type="text" id="breedTitle" readonly>
+                </div>
+            </div>
+            <div class="col-4">
+                <label class="col-form-label">Теги питомца</label>
+                <div class="d-flex" id="petTagsArea">
+                </div>
+            </div>
+        </div>
         
-<div class="form-group row">
-    <div class="col-3 d-flex">
-        <label asp-for="@Model.Visit.Date" class="mt-auto mb-auto mr-1"></label>
-        <div>
-            <input type="date" asp-for="@Model.Visit.Date" class="form-control ml-1" />
-            <span asp-validation-for="@Model.Visit.Date" class="text-danger"></span>
-        </div>
-    </div>
-    <div class="col-3 d-flex">
-        <label asp-for="@Model.Visit.TimeBegin" class="mt-auto mb-auto mr-1"></label>
-        <select asp-for="@Model.Visit.TimeBegin.Hour" name="hour" class="form-control ml-1">
-            @for (var i = 0; i < 24; i++)
-            {
-                @if (i == @Model.Visit.TimeBegin.Hour)
-                {
-                    <option value="@i" selected>@i</option>
-                }
-                else
-                {
-                    <option value="@i">@i</option>
-                }
-            }
-        </select>
-        <label class="mt-auto mb-auto ml-1 mr-1">:</label>
-        <select asp-for="@Model.Visit.TimeBegin.Minute" name="minute" class="form-control ml-1">
-            @for (var i = 0; i < 60; i += 5)
-            {
-                @if (i == 0)
-                {
-                    <option value="@i" selected>00</option>
-                }
-                else if (i == 5)
-                {
-                    <option value="@i">05</option>
-                }
-                else
-                {
-                    <option value="@i">@i</option>
-                }
-            }
-        </select>
-    </div>
-    <div class="col-3 d-flex">
-        <label asp-for="@Model.Visit.User" class="mt-auto mb-auto mr-1"></label>
-        <div>
-            <select asp-for="@Model.Visit.UserId" name="userId" class="form-control ml-1">
-                @foreach (var item in Model.Masters)
-                {
-                    @if (item == @Model.Visit.User)
-                    {
-                        <option value="@item.Id" selected>@item.Name</option>
-                    }
-                    else
-                    {
-                        <option value="@item.Id">@item.Name</option>
-                    }
-                }
-            </select>
-            <span asp-validation-for="@Model.Visit.Date" class="text-danger"></span>
-        </div>
-    </div>
-</div>
-    
 
-<div class="form-group row">
-    <div class="col-4 d-flex">
-        <label asp-for="@Model.Visit.Pet" class="mt-auto mb-auto mr-1"></label>
-        <div>
-            <input asp-for="@Model.Visit.PetId" hidden id="petId">
-            <input asp-for="@Model.Visit.Pet.Name" class="form-control" type="text" readonly>
-            <span asp-validation-for="@Model.Visit.PetId" class="text-danger"></span>
-        </div>
-        <button type="button" class="btn btn-success ml-1" data-toggle="modal" data-target="#findPetModal">
-            <span class="fa fa-plus fa-lg mt-auto mb-auto mr-1" ></span>
-        </button>
-    </div>
-    <div class="col-4 d-flex">
-        <label asp-for="@Model.Visit.Pet.Breed" class="mt-auto mb-auto mr-1"></label>
-        <div>
-            <input asp-for="@Model.Visit.Pet.BreedId" hidden id="breedId">
-            <input asp-for="@Model.Visit.Pet.Breed.Title" class="form-control" type="text" readonly>
-        </div>
-    </div>
-    <div class="col-4 d-flex">
-        <label class="mt-auto mb-auto mr-1">Теги питомца</label>
-        <div id="petTagsArea">
-        </div>
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-4 d-flex">
-        <label asp-for="@Model.Visit.Pet.Clients" class="mr-1"></label>
-        <div>
-            <select multiple name="clientsList"  class="form-control ml-1 h-50" style="min-width: 200px">
-                <option>Не выбрано</option>
-            </select>
-        </div>
-    </div>
-    <div class="col-4 d-flex">
-        <label class="mr-1">Телефон</label>
-        <div>
-            <input class="form-control" type="text" readonly>
-        </div>
-    </div>
-    <div class="col-4 d-flex">
-        <label class="mr-1">Теги клиента</label>
-        <div id="clientTagsArea">
-        </div>
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-6 container">
-        <div class="row">
-            <div class="col-9 d-flex text-left">
-                <span class="fa fa-search fa-lg mt-auto mb-auto mr-1"></span>
-                <input type="text" id="procedureSearchTextBox" class="form-control mb-1 ml-1" style="min-width: 200px"/>
+        <div class="form-group row">
+            <div class="col-4">
+                <label asp-for="@Model.Visit.Pet.Clients" class="col-form-label"></label>
+                <div>
+                    <select multiple name="clientsList" id="clientsList" class="form-control h-25">
+                        <option>Не выбрано</option>
+                    </select>
+                </div>
             </div>
-            <div class="col-3">
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createProcedureModal">Создать</button>
+            <div class="col-4">
+                <label class="col-form-label">Телефон</label>
+                <div>
+                    <input class="form-control" type="text" id="clientPhone" readonly>
+                </div>
+            </div>
+            <div class="col-4">
+                <label class="col-form-label">Теги клиента</label>
+                <div class="d-flex" id="clientTagsArea">
+                </div>
             </div>
         </div>
-        <div class="row">
-            <table class="table table-borderless" style="width: 100%">
-                <thead>
-                <tr>
-                    <th>
-                        Id
-                    </th>
-                    <th>
-                        Процедура
-                    </th>
-                    <th>
-                        Стоимость
-                    </th>
-                    <th>
-                        Время
-                    </th>
-                    <th>
-                    </th>
-                </tr>
-                </thead>
-                <tbody id="proceduresTableBody">
+        
 
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div class="col-6 container">
-
-    </div>
-
-</div>
-
-<div class="form-group row">
-    <div class="col-8 offset-2 row">
-        <div class="col">
-            <input type="button" onclick="DoesPhoneExist()" class="btn btn-info w-75" value="Добавить" />
-        </div>
-        <div class="col">
-            <a class="btn btn-danger w-75" asp-controller="Visits" asp-action="Index">Посещения</a>
-        </div>
-    </div>
-</div>
-</div>
-
-
-<div class="modal fade" id="createProcedureModal" tabindex="-1" role="dialog" aria-labelledby="createProcedureLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createProcedureModalLabel">Создать новую процедуру</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+        <div class="form-group row">
+            <div class="col-12">
+                <div class="d-flex">
+                    <label class="col-form-label">Процедуры</label>
+                    <button type="button" class="btn btn-success ml-1" data-toggle="modal" data-target="#addProcedureModal">
+                        <span class="fa fa-plus fa-lg mt-auto mb-auto mr-1"></span>
+                    </button>
+                </div>
+                <div>
+                    <table class="table table-borderless" style="width: 100%">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Id
+                                </th>
+                                <th>
+                                    Процедура
+                                </th>
+                                <th>
+                                    Стоимость
+                                </th>
+                                <th>
+                                    Время
+                                </th>
+                                <th>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="selectedProceduresTableBody">
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div class="modal-body">
-                <table class="table table-borderless text-center" style="width: 100%">
-                    <tr>
-                        <td width="20%">
-                            <label>Процедура</label>
-                        </td>
-                        <td colspan="2">
-                            <input class="form-control" id="ajaxProcedureTitle" />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td width="20%">
-                            <label>Животное</label>
-                        </td>
-                        <td colspan="2">
-                            <select class="form-control" id="ajaxProcedureAnimalId">
-                                @foreach (var item in Model.Animals)
-                                {
-                                    <option value="@item.Id">@item.Title</option>
-                                }
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label>Стоимость</label>
-                        </td>
-                        <td colspan="2">
-                            <input class="form-control" id="ajaxProcedureCost" type="number" value="0"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label>Время, мин</label>
-                        </td>
-                        <td colspan="2">
-                            <input class="form-control" id="ajaxProcedureTime" type="number" value="0"/>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="AddProcedureAjax()">Создать</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+
+        </div>
+
+        <div class="form-group row">
+            <div class="col-8 offset-2 row">
+                <div class="col">
+                    <input type="button" onclick="DoesPhoneExist()" class="btn btn-info w-75" value="Добавить" />
+                </div>
+                <div class="col">
+                    <a class="btn btn-danger w-75" asp-controller="Visits" asp-action="Index">Посещения</a>
+                </div>
             </div>
         </div>
     </div>
-</div>
 </form>
 
 <div class="modal fade" id="findPetModal" tabindex="-1" role="dialog" aria-labelledby="findPetModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="createPetModalLabel">Найти питомца</h5>
@@ -257,7 +200,38 @@
 
                         <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
                             <div class="card-body">
-                                Некоторый заполнитель для первой панели аккордеона. Эта панель отображается по умолчанию благодаря классу <code>.show</code>.
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-9 d-flex text-left">
+                                            <span class="fa fa-search fa-lg mt-auto mb-auto mr-1"></span>
+                                            <input type="text" id="petSearchTextBox" class="form-control mb-1 ml-1" style="min-width: 200px" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <table class="table table-borderless" style="width: 100%">
+                                            <thead>
+                                                <tr>
+                                                    <th>
+                                                        Id
+                                                    </th>
+                                                    <th>
+                                                        Кличка
+                                                    </th>
+                                                    <th>
+                                                        Порода
+                                                    </th>
+                                                    <th>
+                                                        Клиент
+                                                    </th>
+                                                    <th>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="petsTableBody">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -298,6 +272,117 @@
     </div>
 </div>
 
+<div class="modal fade" id="addProcedureModal" tabindex="-1" role="dialog" aria-labelledby="addProcedureLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createProcedureModalLabel">Добавить процедуру</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="col-12 container">
+                    <div class="row">
+                        <div class="col-9 d-flex text-left">
+                            <span class="fa fa-search fa-lg mt-auto mb-auto mr-1"></span>
+                            <input type="text" id="procedureSearchTextBox" class="form-control mb-1 ml-1" style="min-width: 200px" />
+                        </div>
+                        <div class="col-3">
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createProcedureModal">Создать</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <table class="table table-borderless" style="width: 100%">
+                            <thead>
+                            <tr>
+                                <th>
+                                    Id
+                                </th>
+                                <th>
+                                    Процедура
+                                </th>
+                                <th>
+                                    Стоимость
+                                </th>
+                                <th>
+                                    Время
+                                </th>
+                                <th>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody id="proceduresTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="AddProcedureAjax()">Создать</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="createProcedureModal" tabindex="-1" role="dialog" aria-labelledby="createProcedureLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createProcedureModalLabel">Создать новую процедуру</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-borderless text-center" style="width: 100%">
+                    <tr>
+                        <td width="20%">
+                            <label>Процедура</label>
+                        </td>
+                        <td colspan="2">
+                            <input class="form-control" id="ajaxProcedureTitle" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="20%">
+                            <label>Животное</label>
+                        </td>
+                        <td colspan="2">
+                            <select class="form-control" id="ajaxProcedureAnimalId">
+                                @foreach (var item in Model.Animals)
+                                {
+                                    <option value="@item.Id">@item.Title</option>
+                                }
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Стоимость</label>
+                        </td>
+                        <td colspan="2">
+                            <input class="form-control" id="ajaxProcedureCost" type="number" value="0" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Время, мин</label>
+                        </td>
+                        <td colspan="2">
+                            <input class="form-control" id="ajaxProcedureTime" type="number" value="0" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="AddProcedureAjax()">Создать</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <script type="text/javascript">
@@ -337,173 +422,135 @@
     function SearchProcedureAjax() {
         var breedId = parseInt($("#breedId").val());
         if (breedId === 0) {
+            $("#procedureSearchTextBox").val("");
+            alert("Сначала выберите питомца");
             return;
         }
-        var procedure = $.trim($("#procedureSearchTextBox").val());
+
+        var search = $.trim($("#procedureSearchTextBox").val());
+
+        var request = '{"breedId" : ' + breedId + ', "search": "' + search + '"}';
+
         $.ajax({
             type: "post",
-            url: "/Procedures/SearchProcedure",
-            data: JSON.stringify(procedure, breedId),
+            url: "/Search/Procedure",
+            data: JSON.stringify(request),
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (procedures) {
                 $("#proceduresTableBody tr").remove();
                 var table = $("#proceduresTableBody ");
-                table.innerHTML = "";
-                $.each(procedures, function(idx, elem){
-                    table.append("<tr><td>" + elem.id + "</td><td>" + elem.title + "</td><td>" + elem.cost + "</td><td>" + elem.approximateTime +"</td></tr>");
+                $.each(procedures, function (idx, elem) {
+                    table.append("<tr><td>" + elem.id + "</td>" +
+                        "<td>" + elem.title + "</td>" +
+                        "<td>" + elem.cost + "</td>" +
+                        "<td>" + elem.approximateTime + "</td>" +
+                        "<td><button onclick='SelectProcedure({id:" + elem.id + ", title:\"" + elem.title + "\", cost:" + elem.cost + ",time:" + elem.approximateTime+"})' type=\"button\" class=\"btn btn-success ml-1\">Ok</button></td></tr>");
                 });
             }
         });
     }
 
-
-
-
-
-    function addPetToClientFunc(id, title) {
-        var select = document.getElementById('clientsPets');
-
-        for (var i = 0; i < select.length; i++) {
-            if (select[i].value === id) {
-                return;
-            }
-        }
-
-        select.innerHTML += '<option ondblclick="removePetFromClientFunc(\'' + id + '\')" value="' + id + '">' + title + '</option>';
-        var div = document.getElementById('divPetsIdList');
-        div.innerHTML += '<input type="hidden" class="petHidden" name="clientPets" value="' + id + '" />';
-    }
-
-    function addTagToClientFunc(id, title) {
-        var select = document.getElementById('clientsTags');
-
-        for (var i = 0; i < select.length; i++) {
-            if (select[i].value === id) {
-                return;
-            }
-        }
-
-        select.innerHTML += '<option ondblclick="removeTagFromClientFunc(\'' + id + '\')" value="' + id + '">' + title + '</option>';
-        var div = document.getElementById('divTagIdList');
-        div.innerHTML += '<input type="hidden" class="tagHidden" name="clientTags" value="' + id + '" />';
-    }
-
-    function removeTagFromClientFunc(id) {
-
-        var select = document.getElementById('clientsTags');
-
-        for (var i = 0; i < select.length; i++) {
-            if (select[i].value === id) {
-                select.remove(i);
-                break;
-            }
-        }
-
-        var tags = document.getElementsByClassName('tagHidden');
-        for (var i = 0; i < tags.length; i++) {
-            if (tags[i].value === id) {
-                tags[i].remove();
-                break;
-            }
-        }
-    }
-
-    function removePetFromClientFunc(id) {
-
-        var select = document.getElementById('clientsPets');
-
-        for (var i = 0; i < select.length; i++) {
-            if (select[i].value === id) {
-                select.remove(i);
-                break;
-            }
-        }
-
-        var tags = document.getElementsByClassName('petHidden');
-        for (var i = 0; i < tags.length; i++) {
-            if (tags[i].value === id) {
-                tags[i].remove();
-                break;
-            }
-        }
-    }
-
-    function DoesPhoneExist() {
-        var phone = document.getElementById('clientsPhone').value;
-        $.ajax({
-            type: "post",
-            url: "/Clients/CheckPhone",
-            data: JSON.stringify(phone),
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (clients) {
-                if (clients.length === 0) {
-                    document.getElementById("createForm").submit();
-                }
-                else {
-                    var p = document.getElementById('messageText');
-                    p.innerHTML += "Найдено " + clients.length + " совпадений <br />";
-                    for (var i = 0; i < clients.length; i++) {
-                        p.innerHTML += "<a href='Details/" + clients[i].id + "'>" + clients[i].name + " ("+ clients[i].phone +")</a><br />";
-                    }
-                    $('#modalWindow').modal('show');
-                }
-            }
-        });
+    function SelectProcedure(procedure) {
+        alert(procedure.id + " " + procedure.title + " " + procedure.cost + " " + procedure.time);
+        var table = $("#selectedProceduresTableBody");
+        table.append("<tr><td class='selectedProcedureId'>" + procedure.id + "</td>"
+            + "<td>" + procedure.title + "</td>"
+            + "<td><input class='form-control' value='"+ procedure.cost +"'></td>"
+            + "<td><input class='form-control' value='" + procedure.time + "'></td>"
+            + "<td><button onclick='RemoveProcedure(" + procedure.id + ")' type=\"button\" class=\"btn btn-danger ml-1\">Удалить</button></td></tr>");
     }
 
     $(function () {
-        $("#ajaxBreedFilter").keyup(function () {
-            SearchBreedAjax();
+        $("#petSearchTextBox").keyup(function () {
+            SearchPetAjax();
         });
     });
 
-    function SearchBreedAjax() {
-        var breed = $.trim($("#ajaxBreedFilter").val());
+    function SearchPetAjax() {
+        var pet = $.trim($("#petSearchTextBox").val());
         $.ajax({
             type: "post",
-            url: "/Pets/SearchBreed",
-            data: JSON.stringify(breed),
+            url: "/Search/PetFull",
+            data: JSON.stringify(pet),
             contentType: "application/json; charset=utf-8",
             dataType: "json",
-            success: function (breeds) {
-                var select = document.getElementById('breedSelector');
-                select.innerHTML = "";
-
-                for (var i = 0; i < breeds.length; i++) {
-                    select.innerHTML += '<option value="' + breeds[i].id + '">' + breeds[i].title + '</option>';
-                }
+            success: function (pets) {
+                $("#petsTableBody tr").remove();
+                var table = $("#petsTableBody");
+                $.each(pets, function (i, elem) {
+                    var clients = "";
+                    $.each(elem.clients, function (j, client) {
+                        clients = clients + "<a href='/Clients/Details?Id=" + client.id + "'>" + client.name + "</a><br />";
+                    });
+                    table.append("<tr><td>" + elem.id + "</td>"
+                        + "<td><a href='/Pets/Details?Id=" + elem.id + "'>" + elem.name + "</a></td>"
+                        + "<td>" + elem.breed.title + "</td>"
+                        + "<td>" + clients + "</td>"
+                        + "<td><button onclick='SelectPet(" + elem.id + ")' type=\"button\" class=\"btn btn-success ml-1\">Ok</button></td></tr>");
+                });
             }
         });
     }
 
-    function AddPetAjax() {
-        var petName = $.trim($("#ajaxPetName").val());
-        if (petName === "") {
-            alert("Имя питомца должно быть заполнено");
-            return;
-        }
+    function SelectPet(id) {
+        $("#petId").val(id);
+        FillPetInformation();
+        $('#findPetModal').modal('hide');
+    }
 
-        var breed = parseInt($("#breedSelector").val(), 10);
-        if (breed === null || breed === 0) {
-            alert("Порода питомца должна быть заполнена");
-            return;
-        }
+    function FillPetInformation() {
+        var petId = parseInt($("#petId").val());
+        $.ajax({
+            type: "post",
+            url: "/Search/PetById",
+            data: JSON.stringify(petId),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (pet) {
+                console.log(pet);
+                $("#petName").val(pet.name);
+                $("#breedId").val(pet.breedId);
+                $("#breedTitle").val(pet.breed.title);
+                var tagsDiv = document.getElementById('petTagsArea');
+                tagsDiv.innerHTML = "";
 
-        var bDay = $.trim($("#ajaxBday").val());
+                $.each(pet.tags, function (i, tag) {
+                    tagsDiv.innerHTML += "<a class=\"tag-with-letter mr-1\" style=\"background-color: " + tag.color + "\" " +
+                        "href=\"/PetTags/Details?Id=" + tag.id + "\">" + tag.shortTitle + "</a>";
+                });
+
+                var clientsList = document.getElementById('clientsList');
+                clientsList.innerHTML = "";
+                $.each(pet.clients, function (y, client) {
+                    clientsList.innerHTML += "<option onclick='FillClientInformation(" + client.id + ")' value=\"" + client.id + "\">" + client.name + "</option>";
+                });
+
+            }
+        });
+    }
+
+    function FillClientInformation(id) {
+        if (id === 0)
+            return;
 
         $.ajax({
             type: "post",
-            url: "/Pets/CreateQuick",
-            data: {name : petName, id : breed, day : bDay},
+            url: "/Search/ClientById",
+            data: JSON.stringify(id),
+            contentType: "application/json; charset=utf-8",
             dataType: "json",
-            success: function (result) {
-                var petSearchTextBox = document.getElementById('petSearchTextBox');
-                petSearchTextBox.value = petName;
-                SearchPetAjax();
-                $('#createPetModal').modal('hide');
+            success: function (client) {
+                $("#clientPhone").val(client.phone);
+                var tagsDiv = document.getElementById('clientTagsArea');
+                tagsDiv.innerHTML = "";
+
+                $.each(client.tags, function (i, tag) {
+                    tagsDiv.innerHTML += "<a class=\"tag-with-letter mr-1\" style=\"background-color: " + tag.color + "\" " +
+                        "href=\"/ClientTags/Details?Id=" + tag.id + "\">" + tag.shortTitle + "</a>";
+                });
             }
         });
     }
+
 </script>

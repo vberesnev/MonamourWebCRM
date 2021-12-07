@@ -246,7 +246,7 @@
         var pet = $.trim($("#petSearchTextBox").val());
         $.ajax({
             type: "post",
-            url: "/Clients/SearchPet",
+            url: "/Search/Pet",
             data: JSON.stringify(pet),
             contentType: "application/json; charset=utf-8",
             dataType: "json",
@@ -333,7 +333,7 @@
         var phone = document.getElementById('clientsPhone').value;
         $.ajax({
             type: "post",
-            url: "/Clients/CheckPhone",
+            url: "/Search/Phone",
             data: JSON.stringify(phone),
             contentType: "application/json; charset=utf-8",
             dataType: "json",
@@ -363,7 +363,7 @@
         var breed = $.trim($("#ajaxBreedFilter").val());
         $.ajax({
             type: "post",
-            url: "/Pets/SearchBreed",
+            url: "/Search/Breed",
             data: JSON.stringify(breed),
             contentType: "application/json; charset=utf-8",
             dataType: "json",

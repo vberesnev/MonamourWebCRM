@@ -209,7 +209,7 @@
         var breed = $.trim($("#breedFilter").val());
         $.ajax({
             type: "post",
-            url: "/Pets/SearchBreed",
+            url: "/Search/Breed",
             data: JSON.stringify(breed),
             contentType: "application/json; charset=utf-8",
             dataType: "json",
@@ -234,7 +234,7 @@
         var client = $.trim($("#clientSearchTextBox").val());
         $.ajax({
             type: "post",
-            url: "/Pets/SearchClient",
+            url: "/Search/Client",
             data: JSON.stringify(client),
             contentType: "application/json; charset=utf-8",
             dataType: "json",
