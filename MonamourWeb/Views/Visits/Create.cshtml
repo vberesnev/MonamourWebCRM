@@ -182,7 +182,7 @@
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="createPetModalLabel">Найти питомца</h5>
+                <h5 class="modal-title" id="findPetModalLabel">Найти питомца</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -227,7 +227,7 @@
                                                     </th>
                                                 </tr>
                                             </thead>
-                                            <tbody id="petsTableBody">
+                                            <tbody id="findPetModalPetsTableBody">
                                             </tbody>
                                         </table>
                                     </div>
@@ -245,7 +245,41 @@
                         </div>
                         <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
                             <div class="card-body">
-                                Некоторый заполнитель для второй панели аккордеона. По умолчанию эта панель скрыта.
+                                <table class="table table-borderless text-center" style="width: 100%">
+                                    <tr>
+                                        <td width="20%">
+                                            <label>Кличка</label>
+                                        </td>
+                                        <td colspan="2">
+                                            <input class="form-control" id="findPetModelPetNameFirst" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="20%">
+                                            <label>Порода</label>
+                                        </td>
+                                        <td colspan="2">
+                                            <input class="form-control mb-1" id="findPetModalBreedFilterFirst" placeholder="Введите название породы . . ." />
+                                            <select  class="form-control mt-1" id="breedSelectorFirst">
+                                                <option value="" disabled selected>Выберите породу</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="20%">
+                                            <label>Клиент</label>
+                                        </td>
+                                        <td colspan="2">
+                                            <input class="form-control mb-1" id="clientFilter" placeholder="Введите имя клиента или телефон . . ." />
+                                            <select class="form-control mt-1" id="clientSelector">
+                                                <option value="" disabled selected>Выберите клиента</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" onclick="CreatePetAjax()">Создать питомца</button>
                             </div>
                         </div>
                     </div>
@@ -276,7 +310,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="createProcedureModalLabel">Добавить процедуру</h5>
+                <h5 class="modal-title" id="addProcedureModalLabel">Добавить процедуру</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -286,7 +320,7 @@
                     <div class="row">
                         <div class="col-9 d-flex text-left">
                             <span class="fa fa-search fa-lg mt-auto mb-auto mr-1"></span>
-                            <input type="text" id="procedureSearchTextBox" class="form-control mb-1 ml-1" style="min-width: 200px" />
+                            <input type="text" id="addProcedureModalProcedureSearchTextBox" class="form-control mb-1 ml-1" style="min-width: 200px" />
                         </div>
                         <div class="col-3">
                             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createProcedureModal">Создать</button>
@@ -312,14 +346,13 @@
                                 </th>
                             </tr>
                             </thead>
-                            <tbody id="proceduresTableBody">
+                            <tbody id="addProcedureModalProceduresTableBody">
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="AddProcedureAjax()">Создать</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
             </div>
         </div>
@@ -342,7 +375,7 @@
                             <label>Процедура</label>
                         </td>
                         <td colspan="2">
-                            <input class="form-control" id="ajaxProcedureTitle" />
+                            <input class="form-control" id="createProcedureModalProcedureTitle" />
                         </td>
                     </tr>
                     <tr>
@@ -350,7 +383,7 @@
                             <label>Животное</label>
                         </td>
                         <td colspan="2">
-                            <select class="form-control" id="ajaxProcedureAnimalId">
+                            <select class="form-control" id="createProcedureModalProcedureAnimalId">
                                 @foreach (var item in Model.Animals)
                                 {
                                     <option value="@item.Id">@item.Title</option>
@@ -363,7 +396,7 @@
                             <label>Стоимость</label>
                         </td>
                         <td colspan="2">
-                            <input class="form-control" id="ajaxProcedureCost" type="number" value="0" />
+                            <input class="form-control" id="createProcedureModalProcedureCost" type="number" value="0" />
                         </td>
                     </tr>
                     <tr>
@@ -371,13 +404,13 @@
                             <label>Время, мин</label>
                         </td>
                         <td colspan="2">
-                            <input class="form-control" id="ajaxProcedureTime" type="number" value="0" />
+                            <input class="form-control" id="createProcedureModalProcedureTime" type="number" value="0" />
                         </td>
                     </tr>
                 </table>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="AddProcedureAjax()">Создать</button>
+                <button type="button" class="btn btn-primary" onclick="CreateProcedureAjax()">Создать</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
             </div>
         </div>
@@ -387,16 +420,16 @@
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <script type="text/javascript">
 
-    function AddProcedureAjax() {
-        var procedureTitle = $.trim($("#ajaxProcedureTitle").val());
+    function CreateProcedureAjax() {
+        var procedureTitle = $.trim($("#createProcedureModalProcedureTitle").val());
         if (procedureTitle === "") {
             alert("Название процедуры должно быть заполнено");
             return;
         }
 
-        var procedureAnimalId = $("#ajaxProcedureAnimalId").val();
-        var procedureCost = $("#ajaxProcedureCost").val();
-        var procedureTime = $("#ajaxProcedureTime").val();
+        var procedureAnimalId = $("#createProcedureModalProcedureAnimalId").val();
+        var procedureCost = $("#createProcedureModalProcedureCost").val();
+        var procedureTime = $("#createProcedureModalProcedureTime").val();
 
 
         $.ajax({
@@ -405,7 +438,7 @@
             data: { title: procedureTitle, animalId: procedureAnimalId, cost: procedureCost, time: procedureTime },
             dataType: "json",
             success: function (result) {
-                var procedureSearchTextBox = document.getElementById('procedureSearchTextBox');
+                var procedureSearchTextBox = document.getElementById('addProcedureModalProcedureSearchTextBox');
                 procedureSearchTextBox.value = procedureTitle;
                 SearchProcedureAjax();
                 $('#createProcedureModal').modal('hide');
@@ -414,20 +447,63 @@
     }
 
     $(function () {
-        $("#procedureSearchTextBox").keyup(function () {
+        $("#petSearchTextBox").keyup(function () {
+            SearchPetAjax();
+        });
+    });
+
+    $(function () {
+        $("#addProcedureModalProcedureSearchTextBox").keyup(function () {
             SearchProcedureAjax();
         });
     });
 
+    $(function () {
+        $("#findPetModalBreedFilterFirst").keyup(function () {
+            SearchBreedAjaxFirst();
+        });
+    });
+
+    $(function () {
+        $("#breedFilterSecond").keyup(function () {
+            SearchBreedAjaxSecond();
+        });
+    });
+
+    $(function () {
+        $("#clientFilter").keyup(function () {
+            SearchClientAjax();
+        });
+    });
+
+    function SearchBreedAjaxFirst() {
+        var breed = $.trim($("#findPetModalBreedFilterFirst").val());
+        $.ajax({
+            type: "post",
+            url: "/Search/Breed",
+            data: JSON.stringify(breed),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (breeds) {
+                var select = document.getElementById('breedSelectorFirst');
+                select.innerHTML = "";
+
+                for (var i = 0; i < breeds.length; i++) {
+                    select.innerHTML += '<option value="' + breeds[i].id + '">' + breeds[i].title + '</option>';
+                }
+            }
+        });
+    }
+
     function SearchProcedureAjax() {
         var breedId = parseInt($("#breedId").val());
         if (breedId === 0) {
-            $("#procedureSearchTextBox").val("");
+            $("#addProcedureModalProcedureSearchTextBox").val("");
             alert("Сначала выберите питомца");
             return;
         }
 
-        var search = $.trim($("#procedureSearchTextBox").val());
+        var search = $.trim($("#addProcedureModalProcedureSearchTextBox").val());
 
         var request = '{"breedId" : ' + breedId + ', "search": "' + search + '"}';
 
@@ -438,8 +514,8 @@
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (procedures) {
-                $("#proceduresTableBody tr").remove();
-                var table = $("#proceduresTableBody ");
+                $("#addProcedureModalProceduresTableBody tr").remove();
+                var table = $("#addProcedureModalProceduresTableBody ");
                 $.each(procedures, function (idx, elem) {
                     table.append("<tr><td>" + elem.id + "</td>" +
                         "<td>" + elem.title + "</td>" +
@@ -452,20 +528,44 @@
     }
 
     function SelectProcedure(procedure) {
-        alert(procedure.id + " " + procedure.title + " " + procedure.cost + " " + procedure.time);
+        if (!IsProcedureAlreadyAdded(procedure.id))
+            return;
         var table = $("#selectedProceduresTableBody");
         table.append("<tr><td class='selectedProcedureId'>" + procedure.id + "</td>"
             + "<td>" + procedure.title + "</td>"
-            + "<td><input class='form-control' value='"+ procedure.cost +"'></td>"
-            + "<td><input class='form-control' value='" + procedure.time + "'></td>"
+            + "<td class='selectedProcedureCost'><input type='number' onchange='RecalculateSum()' class='form-control' value='"+ procedure.cost +"'></td>"
+            + "<td><input type='number' class='form-control' value='" + procedure.time + "'></td>"
             + "<td><button onclick='RemoveProcedure(" + procedure.id + ")' type=\"button\" class=\"btn btn-danger ml-1\">Удалить</button></td></tr>");
     }
 
-    $(function () {
-        $("#petSearchTextBox").keyup(function () {
-            SearchPetAjax();
-        });
-    });
+    function IsProcedureAlreadyAdded(procedureId) {
+        var elements = document.getElementsByClassName("selectedProcedureId");
+        for (let i = 0; i < elements.length; i++) {
+            if (parseInt(elements[i].innerText) === parseInt(procedureId))
+                return false;
+        }
+        return true;
+    }
+
+    function RemoveProcedure(procedureId) {
+        var elements = document.getElementsByClassName("selectedProcedureId");
+        for (let i = 0; i < elements.length; i++) {
+            if (parseInt(elements[i].innerText) === parseInt(procedureId)) {
+                elements[i].parentElement.remove();
+                return;
+            }
+        }
+        alert("Can't find procedure with id "+procedureId);
+    }
+
+    function RecalculateSum() {
+        var sum = 0;
+        var elements = document.getElementsByClassName("selectedProcedureCost");
+        for (let i = 0; i < elements.length; i++) {
+            sum += parseInt(elements[i].children[0].value);
+        }
+        $("#totalSum").val(sum);
+    }
 
     function SearchPetAjax() {
         var pet = $.trim($("#petSearchTextBox").val());
@@ -476,8 +576,8 @@
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (pets) {
-                $("#petsTableBody tr").remove();
-                var table = $("#petsTableBody");
+                $("#findPetModalPetsTableBody tr").remove();
+                var table = $("#findPetModalPetsTableBody");
                 $.each(pets, function (i, elem) {
                     var clients = "";
                     $.each(elem.clients, function (j, client) {
@@ -552,5 +652,26 @@
             }
         });
     }
+
+    function SearchClientAjax() {
+        var search = $.trim($("#clientFilter").val());
+        $.ajax({
+            type: "post",
+            url: "/Search/Client",
+            data: JSON.stringify(search),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (clients) {
+                var select = document.getElementById('clientSelector');
+                select.innerHTML = "";
+
+                for (var i = 0; i < clients.length; i++) {
+                    select.innerHTML += '<option value="' + clients[i].id + '">' + clients[i].name + " " + clients[i].phone + '</option>';
+                }
+            }
+        });
+    }
+
+
 
 </script>
