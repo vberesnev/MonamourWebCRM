@@ -114,6 +114,7 @@ namespace MonamourWeb.Controllers
             viewModel.Visit.Pet = new Pet(){Name = "Не выбрано"};
             viewModel.Visit.Pet.Breed = new Breed() {Id = 0, Title = "Не выбрано"};
             viewModel.Animals = Context.Animals;
+            viewModel.PaymentTypes = Context.PaymentTypes;
 
             return View(viewModel);
         }

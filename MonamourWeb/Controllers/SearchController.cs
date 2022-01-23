@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +6,6 @@ using MonamourWeb.Models;
 using MonamourWeb.Services.Logs;
 using MonamourWeb.ViewModels;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace MonamourWeb.Controllers
 {

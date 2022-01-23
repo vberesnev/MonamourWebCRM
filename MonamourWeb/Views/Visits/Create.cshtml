@@ -7,7 +7,12 @@
     <div class="border p-3">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="form-group row">
-            <h4 class="text-black-50 pl-3">Добавить посещение</h4>
+            <div class="col-6">
+                <h4 class="text-black-50 pl-3">Добавить посещение</h4>
+            </div>
+            <div class="col-6 text-right">
+                <h4 class="text-black pl-3" id="totalSum"></h4>
+            </div>
         </div>
 
 
@@ -140,35 +145,59 @@
                 <div>
                     <table class="table table-borderless" style="width: 100%">
                         <thead>
-                            <tr>
-                                <th>
-                                    Id
-                                </th>
-                                <th>
-                                    Процедура
-                                </th>
-                                <th>
-                                    Стоимость
-                                </th>
-                                <th>
-                                    Время
-                                </th>
-                                <th>
-                                </th>
-                            </tr>
+                        <tr>
+                            <th>
+                                Id
+                            </th>
+                            <th>
+                                Процедура
+                            </th>
+                            <th>
+                                Стоимость
+                            </th>
+                            <th>
+                                Время
+                            </th>
+                            <th>
+                            </th>
+                        </tr>
                         </thead>
                         <tbody id="selectedProceduresTableBody">
                         </tbody>
                     </table>
                 </div>
             </div>
+        </div>
+        
+        <div class="form-group row">
+            <div class="col-12">
+                <div class="d-flex">
+                    <label class="col-form-label">Оплата</label>
+                    <button type="button" class="btn btn-success ml-1" data-toggle="modal" data-target="#addPaymentModal">
+                        <span class="fa fa-plus fa-lg mt-auto mb-auto mr-1"></span>
+                    </button>
+                </div>
+                <div>
+                </div>
+            </div>
+        </div>
+        
 
+        <div class="form-group row">
+            <div class="col-12">
+                <div class="d-flex">
+                    <label class="col-form-label">Информация о посещении</label>
+                </div>
+                <div>
+                    <textarea></textarea>
+                </div>
+            </div>
         </div>
 
         <div class="form-group row">
             <div class="col-8 offset-2 row">
                 <div class="col">
-                    <input type="button" onclick="DoesPhoneExist()" class="btn btn-info w-75" value="Добавить" />
+                    <input type="button" class="btn btn-info w-75" value="Добавить" />
                 </div>
                 <div class="col">
                     <a class="btn btn-danger w-75" asp-controller="Visits" asp-action="Index">Посещения</a>
@@ -251,7 +280,7 @@
                                             <label>Кличка</label>
                                         </td>
                                         <td colspan="2">
-                                            <input class="form-control" id="findPetModelPetNameFirst" />
+                                            <input class="form-control" id="cretePetNameFirst" />
                                         </td>
                                     </tr>
                                     <tr>
@@ -293,7 +322,46 @@
                         </div>
                         <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
                             <div class="card-body">
-                                И, наконец, заполнитель для третьей и последней панели аккордеона. По умолчанию эта панель скрыта.
+                                <table class="table table-borderless text-center" style="width: 100%">
+                                    <tr>
+                                        <td width="20%">
+                                            <label>Кличка</label>
+                                        </td>
+                                        <td colspan="2">
+                                            <input class="form-control" id="cretePetNameSecond" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="20%">
+                                            <label>Порода</label>
+                                        </td>
+                                        <td colspan="2">
+                                            <input class="form-control mb-1" id="findPetModalBreedFilterSecond" placeholder="Введите название породы . . ." />
+                                            <select  class="form-control mt-1" id="breedSelectorSecond">
+                                                <option value="" disabled selected>Выберите породу</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="20%">
+                                            <label>Имя клиента</label>
+                                        </td>
+                                        <td colspan="2">
+                                            <input class="form-control" id="creteClientName" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="20%">
+                                            <label>Телефон клиента</label>
+                                        </td>
+                                        <td colspan="2">
+                                            <input class="form-control" id="creteClientPhone" />
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" onclick="CreatePetAndClientAjax()">Создать питомца и клиента</button>
                             </div>
                         </div>
                     </div>
@@ -353,6 +421,55 @@
                 </div>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addPaymentModal" tabindex="-1" role="dialog" aria-labelledby="addPaymentLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addPaymentModalLabel">Добавить оплату</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="col-12 container">
+                    <div class="row">
+                        <div class="col-9 d-flex text-left">
+                            <table class="table table-borderless text-center" style="width: 100%">
+                                <tr>
+                                    <td>
+                                        Тип оплаты
+                                    </td>
+                                    <td>
+                                        <select class="form-control" id="paymentTypeSelector">
+                                            <option value="">Выберите тип оплаты</option>
+                                            @foreach (var item in Model.PaymentTypes)
+                                            {
+                                                <option value="@item.Id">@item.Type</option>
+                                            }
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Сумма
+                                    </td>
+                                    <td>
+                                        <input class="form-control" id="paymentTypePrice" type="number" value="0" />
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="AddPayment()">Добавить оплату</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
             </div>
         </div>
@@ -420,6 +537,10 @@
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <script type="text/javascript">
 
+    $(document).ready(function() {
+        RecalculateSum();
+    });
+    
     function CreateProcedureAjax() {
         var procedureTitle = $.trim($("#createProcedureModalProcedureTitle").val());
         if (procedureTitle === "") {
@@ -446,6 +567,72 @@
         });
     }
 
+    function CreatePetAjax() {
+        var petName = $.trim($("#cretePetNameFirst").val());
+        if (petName === "") {
+            alert("У питомца должна быть кличка");
+            return;
+        }
+
+        var breedId = $("#breedSelectorFirst").val();
+        if (breedId === null) {
+            alert("У питомца должна быть порода");
+            return;
+        }
+
+        var clientId = $("#clientSelector").val();
+        if (clientId === null) {
+            alert("У питомца должнен быть хозяин");
+            return;
+        }
+
+        $.ajax({
+            type: "post",
+            url: "/Complex/CreatePetWithExistedClient",
+            data: { name: petName, breedId: breedId, clientId: clientId },
+            dataType: "json",
+            success: function (pet) {
+                SelectPet(pet.id);
+            }
+        });
+    }
+
+    function CreatePetAndClientAjax() {
+        var petName = $.trim($("#cretePetNameSecond").val());
+        if (petName === "") {
+            alert("У питомца должна быть кличка");
+            return;
+        }
+
+        var breedId = $("#breedSelectorSecond").val();
+        if (breedId === null) {
+            alert("У питомца должна быть порода");
+            return;
+        }
+
+        var clientName = $.trim($("#creteClientName").val());
+        if (clientName === "") {
+            alert("У клиента должно быть имя");
+            return;
+        }
+
+        var clientPhone = $.trim($("#creteClientPhone").val());
+        if (clientPhone === "") {
+            alert("У клиента должeн быть телефон");
+            return;
+        }
+
+        $.ajax({
+            type: "post",
+            url: "/Complex/CreatePetWithClient",
+            data: { name: petName, breedId: breedId, clientName: clientName, clientPhone: clientPhone },
+            dataType: "json",
+            success: function (pet) {
+                SelectPet(pet.id);
+            }
+        });
+    }
+
     $(function () {
         $("#petSearchTextBox").keyup(function () {
             SearchPetAjax();
@@ -460,13 +647,13 @@
 
     $(function () {
         $("#findPetModalBreedFilterFirst").keyup(function () {
-            SearchBreedAjaxFirst();
+            SearchBreedAjax("findPetModalBreedFilterFirst", "breedSelectorFirst");
         });
     });
 
     $(function () {
-        $("#breedFilterSecond").keyup(function () {
-            SearchBreedAjaxSecond();
+        $("#findPetModalBreedFilterSecond").keyup(function () {
+            SearchBreedAjax("findPetModalBreedFilterSecond", "breedSelectorSecond");
         });
     });
 
@@ -476,8 +663,8 @@
         });
     });
 
-    function SearchBreedAjaxFirst() {
-        var breed = $.trim($("#findPetModalBreedFilterFirst").val());
+    function SearchBreedAjax(textBoxId, selectorId) {
+        var breed = $.trim($("#"+textBoxId).val());
         $.ajax({
             type: "post",
             url: "/Search/Breed",
@@ -485,7 +672,7 @@
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (breeds) {
-                var select = document.getElementById('breedSelectorFirst');
+                var select = document.getElementById(selectorId);
                 select.innerHTML = "";
 
                 for (var i = 0; i < breeds.length; i++) {
@@ -536,6 +723,7 @@
             + "<td class='selectedProcedureCost'><input type='number' onchange='RecalculateSum()' class='form-control' value='"+ procedure.cost +"'></td>"
             + "<td><input type='number' class='form-control' value='" + procedure.time + "'></td>"
             + "<td><button onclick='RemoveProcedure(" + procedure.id + ")' type=\"button\" class=\"btn btn-danger ml-1\">Удалить</button></td></tr>");
+        RecalculateSum();
     }
 
     function IsProcedureAlreadyAdded(procedureId) {
@@ -552,6 +740,7 @@
         for (let i = 0; i < elements.length; i++) {
             if (parseInt(elements[i].innerText) === parseInt(procedureId)) {
                 elements[i].parentElement.remove();
+                RecalculateSum();
                 return;
             }
         }
@@ -564,7 +753,7 @@
         for (let i = 0; i < elements.length; i++) {
             sum += parseInt(elements[i].children[0].value);
         }
-        $("#totalSum").val(sum);
+        $("#totalSum").text("Сумма: "+sum);
     }
 
     function SearchPetAjax() {
